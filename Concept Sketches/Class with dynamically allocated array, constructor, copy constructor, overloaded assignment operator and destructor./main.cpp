@@ -25,7 +25,7 @@ int main ( int argc, char* args[] )
   std::cout << "B:  " <<  my_B << "\n\n\n";
 
 
-  Stack my_C ( my_B );// 'Copy Constructor' Called.
+  Stack my_C( my_B );// 'Copy Constructor' Called.
   my_B.Push( 999 );
   std::cout << "C:  " <<  my_B << "\n\n\n";
 
