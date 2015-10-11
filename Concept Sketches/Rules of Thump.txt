@@ -1,0 +1,30 @@
+ 
+
+ 
+A good rule of thumb is that each class should be built to accomplish a single task. 
+That task should either be the storage and manipulation of some kind of data, 
+OR the coordination of subclasses. Not both.
+
+
+
+Composition (also known as object composition).
+Is used for objects that have a 'has-a' relationship to each other.
+
+Composition implies ownership between the complex class and any subclasses. 
+When the complex class is created, the subclasses are created. When the complex class is destroyed, 
+the subclasses are similarly destroyed.
+
+Aggregation is a specific type of composition where no ownership between the complex object 
+and the subobjects is implied. When an aggregate is destroyed, the subobjects are not destroyed.
+
+Typically use pointer variables that point to an object that lives outside the scope of the aggregate class.
+
+
+
+Inheritance
+The object being inherited from is called the 'parent' or 'base', 
+and the object doing the inheriting is called the 'child' or 'derived' object.
+In inheritance, each child has an 'is-a' relationship with it’s parent.
+
+
+
