@@ -25,6 +25,7 @@ Stack& Stack::operator= ( const Stack& s_source )
     return *this;
 
   delete[] m_array;// Deallocate any value that is already being hold.
+  m_array = 0;// NULL
   m_array = new int[s_source.m_size];
 
   for( int i = 0 ; i < s_source.m_size ; ++i )
@@ -82,6 +83,6 @@ bool Stack::is_Empty() const
 std::ostream& operator<< ( std::ostream& out, const Stack& s_source ) 
 {
   for( int i = 0 ; i < s_source.m_top ; ++i )
-    out << s_source.m_array[i] << "  ";
+    out << s_source.m_array[i] <<"  ";
   return out;
 }
