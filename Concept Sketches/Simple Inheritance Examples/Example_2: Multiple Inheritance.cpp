@@ -95,11 +95,11 @@ int main( int argc, char* args[] )
 
 // This is what the inheritance tree looks like:
 
-/*           my_Top
- *              |
- *           my_Base
- *           /     \
+/*    my_Top        my_Top
+ *       |             |
+ *    my_Base       my_Base
+ *       |             |
  *  my_Middle_A    my_Middle_B
- *           \     /
- *           my_End 
+ *           \      /
+ *            my_End 
  */
