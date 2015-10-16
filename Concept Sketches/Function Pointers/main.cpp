@@ -1,7 +1,7 @@
  
 #include<iostream>
-#include <algorithm>
-#include <random>
+#include<algorithm>
+#include<random>
 
 
 
@@ -72,7 +72,7 @@ void Face_3( float (*functions_ptr_arr[])( float x, float y, bool print ), float
   std::cout <<"\n\nThe Starting Number is: "<< starting_number <<"  and the Action Number is: "<< action_number <<"\n\n";
   float end_number = starting_number;
   for( unsigned int i = 0 ; i < 4 ; ++i ) {
-    std::cout <<"Action "<< i + 1 <<" is: " << end_number;
+    std::cout <<"Action "<< i + 1 <<" is: "<< end_number;
     end_number = functions_ptr_arr[i]( end_number, action_number, true );
     std::cout << action_number <<" = "<< end_number <<"\n";
   }

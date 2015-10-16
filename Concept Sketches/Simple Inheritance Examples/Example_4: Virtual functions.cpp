@@ -1,6 +1,8 @@
 
 #include <iostream> 
 
+// Virtual functions and polymorphism:
+
 
 
 class Animal
@@ -41,7 +43,7 @@ class Lamb: public Animal
 public:
   Lamb( std::string s_name ) : Animal( s_name ) {}
   virtual std::string Get_type() { return "Lamb"; }
-  std::string Get_sound() { return "meh"; }
+  std::string Get_sound() { return "Meh"; }
 };
 
 
@@ -71,7 +73,7 @@ int main( int argc, char* args[] )
 
 
   for( unsigned int i = 0 ; i < 9 ; ++i ) {
-    // Here we are use the same function for 'Cat', 'Dog' and 'Lamb'.
+    // Here we are use the same function for 'Cat', 'Dog' and 'Lamb':
     Print_animal( *animals_ptr[i] );
     // This is VERY useful, this means we don't have to declare a new functions for each Derived-class.
   }
