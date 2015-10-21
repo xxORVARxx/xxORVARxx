@@ -12,7 +12,7 @@ bool Get_number_from_cin( T& num )
   if( std::cin.fail() )// User didn't input a number:
     {
       std::cin.clear(); // Reset failbit.
-      // This tels cin to ignore maximum number of characters, starting after the first '\n' (or EOF):
+      // This tells cin to ignore maximum number of characters, starting after the first '\n' (or EOF):
       std::cin.ignore( std::numeric_limits< std::streamsize >::max(), '\n' );
       return false;
     }   

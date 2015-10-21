@@ -28,3 +28,5 @@ In inheritance, each child has an 'is-a' relationship with it’s parent.
 
 
 
+Key to Mastery: Knowledge of 'Software Patterns'!
+Patterns = Describes a 'solution' to a common 'problem' arising within a 'context'.

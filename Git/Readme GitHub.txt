@@ -86,4 +86,32 @@ Connect Your Local Repository To Your GitHub Repository:
 - To see the history of commits:
     $git log
 
+    
+-===- Git .gitignore -===-
 
+Git uses .gitignore files to determine which files and directories to ignore, before a commit.
+  To create a .gitignore file:
+    $touch .gitignore
+
+There are three ways to tell Git which files or directories to ignore:
+
+- Create a local .gitignore:
+    You can place a .gitignore file in any directory in your Git project.
+    Local .gitignore files should be committed into your repository, 
+    in order to share the ignore rules with others that clone the repository.
+
+- Create a global .gitignore:
+    You might create the file at ~/.gitignore_global and add some rules to it.
+      $git config --global core.excludesfile ~/.gitignore_global
+
+- Repository excludes:
+    In your local Git project/repository, open the file called .git/info/exclude,
+      (the  .git/  can be a hidden folder).
+    Open the 'exclude' file and add the name of the file you want to ignore.
+    No .gitignore file is created so it won't be a part of the 'commit'.
+    
+    
+    
+    
+    
+    
