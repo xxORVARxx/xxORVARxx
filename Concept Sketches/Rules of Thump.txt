@@ -1,32 +1,69 @@
- 
 
- 
-A good rule of thumb is that each class should be built to accomplish a single task. 
-That task should either be the storage and manipulation of some kind of data, 
-OR the coordination of subclasses. Not both.
+-===- Rule Of Thumb -===-
 
+- Each class should be built to accomplish a single task. 
+  That task should either be the storage and manipulation of some kind of data, 
+  OR the coordination of subclasses. Not both.
 
+- Key to Mastery is: Knowledge of 'Software Patterns'!
+  Patterns: Describes a 'solution' to a common 'problem' arising within a 'context'.
 
-Composition (also known as object composition).
-Is used for objects that have a 'has-a' relationship to each other.
+- Program to an interface, not an implementation.
 
-Composition implies ownership between the complex class and any subclasses. 
-When the complex class is created, the subclasses are created. When the complex class is destroyed, 
-the subclasses are similarly destroyed.
-
-Aggregation is a specific type of composition where no ownership between the complex object 
-and the subobjects is implied. When an aggregate is destroyed, the subobjects are not destroyed.
-
-Typically use pointer variables that point to an object that lives outside the scope of the aggregate class.
+- Favor object composition over class inheritance.
 
 
+-===- C++ -===-
 
-Inheritance
-The object being inherited from is called the 'parent' or 'base', 
-and the object doing the inheriting is called the 'child' or 'derived' object.
-In inheritance, each child has an 'is-a' relationship with it’s parent.
+- Objects are created by instantiating a class. 
+  The object is said to be an instance of the class.
+
+  
+  
+- Inheritance: (white-box)
+    The object being inherited from is called the 'parent' or 'base', 
+    and the object doing the inheriting is called the 'child' or 'derived' object.
+    In inheritance, each child has an 'is-a' relationship with it’s parent.
+
+    
+- Composition: (also known as object composition) (black boxes)
+  - Is used for objects that have a 'has-a' relationship to each other.
+  - Composition implies ownership between the complex class and any subclasses. 
+    When the complex class is created, the subclasses are created. When the complex class is destroyed, 
+    the subclasses are similarly destroyed.
+
+- Aggregation: (or Delegation)
+- ?Acquaintance?
+  is a specific type of composition where no ownership between the complex object 
+  and the subobjects is implied. When an aggregate is destroyed, the subobjects are not destroyed.
+  - Typically use pointer variables that point to an object that lives outside the scope of the aggregate class.
+
+  
+- Polymorphism and Dynamic binding: 
+    Dynamic binding means that issuing a request doesn't commit you to a particular
+    implementation until run-time. Consequently, you can write programs that expect
+    an object with a particular interface, knowing that any object that has the correct
+    interface will accept the request. Moreover, dynamic binding lets you substitute
+    objects that have identical interfaces for each other at run-time. This
+    substitutability is known as polymorphism, and it's a key concept in
+    object-oriented systems. It lets a client object make few assumptions about other
+    objects beyond supporting a particular interface. Polymorphism simplifies the
+    definitions of clients, decouples objects from each other, and lets them vary
+    their relationships to each other at run-time.
+
+
+- Abstract class will defer some or all of its implementation to operations defined in subclasses, 
+  an abstract class cannot be instantiated.
+  The operations that an abstract class declares but doesn't implement are called abstract operations. 
+  
+-Concrete classes are classes that are not abstract.
+
+    
+    
+-===- -===-
 
 
 
-Key to Mastery: Knowledge of 'Software Patterns'!
-Patterns = Describes a 'solution' to a common 'problem' arising within a 'context'.
+
+
+

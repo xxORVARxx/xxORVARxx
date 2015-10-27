@@ -102,13 +102,6 @@ namespace xx
   private:
     unsigned int& m_matces;
   };
-
-  // A recursive-function used to calculate the award:
-  double Calculate_award( double award, unsigned int num )
-  {
-    if( num > 1 )  award = Calculate_award( award, --num );
-    return ( award /= 2 );
-  }
 };//end namespace xx.
 
 
@@ -211,9 +204,9 @@ void Check_how_much_was_won( double total_award, unsigned int difficulty, unsign
   unsigned int wrongs = ( difficulty - rights );
   unsigned int mismatches = ( difficulty - matces );
   double award = total_award;
-  award = xx::Calculate_award( total_award, mismatches );
-  if(( matces == 0 )&&( wrongs )) 
-    award = xx::Calculate_award( award, wrongs );
+  award = ( total_award / ( 2 * mismatches ));
+  if(( matces == 0 )&&( wrongs ))
+    award = ( award / ( 2 * wrongs ));
   std::cout <<"You won: "<< (unsigned int)( award + 0.5 ) <<" kr!  Of the total: "<< (unsigned int)( total_award + 0.5 ) <<" kr,  ";
   std::cout <<"which is: "<< std::fixed << std::setprecision(3) << ( award / total_award ) * 100 <<"%.\n";
 }
