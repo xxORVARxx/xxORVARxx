@@ -21,16 +21,18 @@ void Pop();
 struct State // Interface class:
 {
   virtual ~State() {}
+  virtual void on_Enter() = 0;
   virtual void Update() = 0;
   virtual void Render() = 0;
-  virtual void Clean() = 0;
+  virtual void on_Exit() = 0;
   virtual std::string Get_state_id() const = 0;
 };
 
 struct State_A : public State
 {
-  State_A() : m_c('?') {}
+  State_A() : m_c('?'), m_ptr( NULL ) {}
   virtual ~State_A() {}
+  virtual void on_Enter() { std::cout <<"\t A Enter.\n"; m_ptr = new int; }
   virtual void Update() { 
     std::cout <<"\t A Update:\n\t 'p'=Pop, 'c'=Change, 'a'=Push-A, 'b'=Push-B\n\t 'esc'=To Continue, Pop all states to Quit.\n";
     while( m_c != 27 )
@@ -56,15 +58,17 @@ struct State_A : public State
     m_c = '?';
   }
   virtual void Render() { std::cout <<"\t A Render.\n"; }
-  virtual void Clean() { std::cout <<"\t A Clean.\n"; }
+  virtual void on_Exit() { std::cout <<"\t A Exit.\n"; delete m_ptr; }
   virtual std::string Get_state_id() const { return "A"; }
   char m_c;
+  int* m_ptr;
 };
 
 struct State_B : public State
 {
-  State_B() : m_c('?') {}
+  State_B() : m_c('?'), m_ptr( NULL ) {}
   virtual ~State_B() {}
+  virtual void on_Enter() { std::cout <<"\t B Enter.\n"; m_ptr = new int; }
   virtual void Update() {
     std::cout <<"\t B Update:\n\t 'p'=Pop, 'c'=Change, 'a'=Push-A, 'b'=Push-B\n\t 'esc'=To Continue, Pop all states to Quit.\n";
     while( m_c != 27 )
@@ -90,9 +94,10 @@ struct State_B : public State
     m_c = '?';
   }
   virtual void Render() { std::cout <<"\t B Render.\n"; }
-  virtual void Clean() { std::cout <<"\t B Clean.\n"; }
+  virtual void on_Exit() { std::cout <<"\t B Exit.\n"; delete m_ptr; }
   virtual std::string Get_state_id() const { return "B"; }
   char m_c;
+  int* m_ptr;
 };
 
 
@@ -129,28 +134,32 @@ public:
       m_states_vec.back()->Render();
   }
   void Clean() {
-    std::for_each( m_states_vec.begin(), m_states_vec.end(), []( State* i ){ i->Clean(); delete i; } );
+    std::for_each( m_states_vec.begin(), m_states_vec.end(), []( State* i ){ i->on_Exit(); delete i; } );
     m_states_vec.clear();
-    std::for_each( m_state_change_vec.begin(), m_state_change_vec.end(), []( State* i ){ i->Clean(); delete i; } );
+    std::for_each( m_state_change_vec.begin(), m_state_change_vec.end(), []( State* i ){ i->on_Exit(); delete i; } );
     m_state_change_vec.clear();
   }
 
 private:
-  void Delete_state() {
+  void Delete_and_remove_state() {
     if( ! m_states_vec.empty() ) 
       {
-	m_states_vec.back()->Clean();
+	m_states_vec.back()->on_Exit();
 	delete m_states_vec.back();
 	m_states_vec.pop_back();
       }
+  }
+  void Add_and_begin_state( State* _state ) {
+    m_states_vec.push_back( _state );
+    m_states_vec.back()->on_Enter();
   }
   void Refresh() {
     for( auto i = m_state_change_vec.begin() ; i != m_state_change_vec.end() ; ++i ) 
       {
 	if( *i == NULL )
-	  this->Delete_state();
+	  this->Delete_and_remove_state();
 	else 
-	  m_states_vec.push_back( *i );
+	  this->Add_and_begin_state( *i );
       }
     m_state_change_vec.clear();
     m_refresh = false;
