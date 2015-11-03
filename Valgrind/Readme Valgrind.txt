@@ -53,3 +53,6 @@ To see more warnings and errors in g++, you can use:
   
   
   
+valgrind --leak-check=full --track-origins=yes
+  
+  

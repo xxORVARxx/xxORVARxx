@@ -1,4 +1,6 @@
 
+http://www.shellcheck.net/
+
 - Tutorials:
     http://www.tldp.org/LDP/abs/html/
 

@@ -1,12 +1,12 @@
 
-#include<iostream> //  For: std::cin, std::cout, std::numeric_limits.
-#include<iomanip> //   For: std::fixed, std::setprecision.
-#include<cmath> //     For: std::pow.
-#include<vector> //    For: std::vector.
-#include<string> //    For: std::string.
-#include<sstream> //   For: std::stringstream.
-#include<algorithm> // For: std::search_n, std::generate, std::transform, std::for_each, 
-//                          std::mt19937, std::random_device, std::bind2nd, std::modulus, std::equal_to.
+#include <iostream> //  For: std::cin, std::cout, std::numeric_limits.
+#include <iomanip> //   For: std::fixed, std::setprecision.
+#include <cmath> //     For: std::pow.
+#include <vector> //    For: std::vector.
+#include <string> //    For: std::string.
+#include <sstream> //   For: std::stringstream.
+#include <algorithm> // For: std::search_n, std::generate, std::transform, std::for_each, 
+//                           std::mt19937, std::random_device, std::bind2nd, std::modulus, std::equal_to.
 
 
 namespace xx

@@ -1,7 +1,7 @@
  
-#include<iostream>
-#include<algorithm>
-#include<random>
+#include <iostream>
+#include <algorithm>
+#include <random>
 
 
 

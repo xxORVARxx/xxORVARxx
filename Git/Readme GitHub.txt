@@ -1,4 +1,6 @@
 
+https://www.youtube.com/watch?v=6cli2BdiPPU
+
 -===- List Of Commands -===-
 
 $sudo apt-get install git
@@ -110,6 +112,15 @@ There are three ways to tell Git which files or directories to ignore:
     Open the 'exclude' file and add the name of the file you want to ignore.
     No .gitignore file is created so it won't be a part of the 'commit'.
     
+ 
+ 
+-===- Git Undo -===-   
+
+- To undo all changes in your local repository and get you last commit: 
+  (all changes that you made since last commit will be permanently lost)
+    git checkout -- My_File_or_Directory
+    git checkout -- *.cpp *.h
+
     
     
     
