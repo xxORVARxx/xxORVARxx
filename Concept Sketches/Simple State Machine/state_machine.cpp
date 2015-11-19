@@ -33,7 +33,8 @@ struct State_A : public State
   State_A() : m_c('?'), m_ptr( NULL ) {}
   virtual ~State_A() {}
   virtual void on_Enter() { std::cout <<"\t A Enter.\n"; m_ptr = new int; }
-  virtual void Update() { 
+  virtual void Update() 
+  { 
     std::cout <<"\t A Update:\n\t 'p'=Pop, 'c'=Change, 'a'=Push-A, 'b'=Push-B\n\t 'esc'=To Continue, Pop all states to Quit.\n";
     while( m_c != 27 )
       {
@@ -69,7 +70,8 @@ struct State_B : public State
   State_B() : m_c('?'), m_ptr( NULL ) {}
   virtual ~State_B() {}
   virtual void on_Enter() { std::cout <<"\t B Enter.\n"; m_ptr = new int; }
-  virtual void Update() {
+  virtual void Update() 
+  {
     std::cout <<"\t B Update:\n\t 'p'=Pop, 'c'=Change, 'a'=Push-A, 'b'=Push-B\n\t 'esc'=To Continue, Pop all states to Quit.\n";
     while( m_c != 27 )
       {
@@ -107,33 +109,47 @@ class Game_state_machine
 public:
   Game_state_machine() : m_refresh(false) {};
 
-  void Push_state( State* _state ) {
-    m_refresh = true;
+  void Push_state( State* _state ) 
+  {
+    if( _state == NULL ) {
+      std::cout << "ERROR: Can't Push 'NULL' as a State!\n";
+      return;
+    }
     m_state_change_vec.push_back( _state );// Add.
-  }
-  void Change_state( State* _state ) {
     m_refresh = true;
+  }
+  void Change_state( State* _state ) 
+  {
+    if( _state == NULL ) {
+      std::cout << "ERROR: Can't Change a State with 'NULL'!\n";
+      return;
+    }
     if( _state->Get_state_id() != m_states_vec.back()->Get_state_id() ) {
       m_state_change_vec.push_back( NULL );// Remove.
       m_state_change_vec.push_back( _state );// Add.
     }
+    m_refresh = true;
   }
-  void Pop_state() {
+  void Pop_state() 
+  {
     m_refresh = true;
     m_state_change_vec.push_back( NULL );// Remove.
   }
 
-  void Update() {
+  void Update() 
+  {
     if( ! m_states_vec.empty() )
       m_states_vec.back()->Update();
     if( m_refresh )
       this->Refresh();
   }
-  void Render() {
+  void Render() 
+  {
     if( ! m_states_vec.empty() )
       m_states_vec.back()->Render();
   }
-  void Clean() {
+  void Clean() 
+  {
     std::for_each( m_states_vec.begin(), m_states_vec.end(), []( State* i ){ i->on_Exit(); delete i; } );
     m_states_vec.clear();
     std::for_each( m_state_change_vec.begin(), m_state_change_vec.end(), []( State* i ){ i->on_Exit(); delete i; } );
@@ -141,19 +157,21 @@ public:
   }
 
 private:
-  void Delete_and_remove_state() {
-    if( ! m_states_vec.empty() ) 
-      {
-	m_states_vec.back()->on_Exit();
-	delete m_states_vec.back();
-	m_states_vec.pop_back();
-      }
+  void Delete_and_remove_state() 
+  {
+    if( ! m_states_vec.empty() ) {
+      m_states_vec.back()->on_Exit();
+      delete m_states_vec.back();
+      m_states_vec.pop_back();
+    }
   }
-  void Add_and_begin_state( State* _state ) {
+  void Add_and_begin_state( State* _state ) 
+  {
     m_states_vec.push_back( _state );
     m_states_vec.back()->on_Enter();
   }
-  void Refresh() {
+  void Refresh() 
+  {
     for( auto i = m_state_change_vec.begin() ; i != m_state_change_vec.end() ; ++i ) 
       {
 	if( *i == NULL )
