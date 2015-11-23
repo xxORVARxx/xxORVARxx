@@ -24,6 +24,8 @@ A simple makefile consists “rules”, with the following shape:
 A TAB character must come at the beginning of every line in the 
 recipe to distinguish recipes from other lines in the makefile.
 
+The prerequisites are NOT always updating from left to right.
+
 'make' echoes the commands, after macro substitution to show you 
 what is happening as it happens. @ will to turn that off:
  -----------------------------------------------------
@@ -102,16 +104,16 @@ definitions attached to a target that are valid only during
 the processing of that target and any of its prerequisites.
 
 The general syntax for target-specific variables is:
------------------------------------------------------
+ -----------------------------------------------------
 |target...: variable = value
 |target...: variable := value
 |target...: variable += value
 |target...: variable ?= value
------------------------------------------------------
+ -----------------------------------------------------
 The variable valid during the processing of all prerequisites as well.
 
 To redefine a variable just for a single rule or pattern:
------------------------------------------------------
+ -----------------------------------------------------
 |# This is the original rule:
 |gui.o: gui.h
 |	$(COMPILE.c) $(OUTPUT_OPTION) $<
@@ -298,6 +300,7 @@ $(dir list...)
       source-dirs := $(sort $(dir $(shell find . -name '*.cpp')))
 
 $(notdir name...)
+  returns the file without the directory portion
 
 $(suffix name...)
   returns the suffix of each word in its argument.
