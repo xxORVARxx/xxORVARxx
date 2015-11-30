@@ -110,6 +110,13 @@ void Time_point()
       std::cout <<"Time elapsed: "<< d.count() <<"\n";
       std::cout <<"Time elapsed in microseconds: "<< std::chrono::duration_cast< std::chrono::microseconds >( d ).count() <<"\n";
     }
+
+  // Measure time, another example:
+  end = std::chrono::steady_clock::now();
+
+  std::chrono::duration< double, std::milli > d2( end - start );
+  double my_double = d2.count();
+  std::cout <<"And now time elapsed in milliseconds: "<< my_double <<"\n";
 }
 
 
