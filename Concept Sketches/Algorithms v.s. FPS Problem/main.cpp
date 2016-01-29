@@ -2,16 +2,25 @@
 #include <iostream>
 #include <iomanip> 
 
+/*    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *    !!! NOTE, I HAVE NOW REALISED      !!!
+ *    !!! THAT THIS WAY OF DOING THINGS, !!!
+ *    !!! DOES NOT WORK AS I INTENDED.   !!!
+ *    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ */
+
+/*    !!! THIS IS OLD AND OUTDATED !!!
+ *  Use this program to test if your algorithm end up with
+ *  the same result when the FPS changes but the time period
+ *  stays the same, or 1 second.
+ */
+
+
+
 // --- GLOBAL VARIABLE ---
 double FPS;
 double word_speed;
 int w = 10;
-
-
-/*  Use this program to test if your algorithm end up with
- *  the same result when the FPS changes but the time period
- *  stays the same, or 1 second.
- */
 
 
 // --- THE BASE CLASS ---
@@ -101,6 +110,44 @@ struct Test_3 : public Test_base
 
 
 
+// --- TEST 3 ---
+struct Test_4 : public Test_base
+{
+  Test_4() 
+  {
+    acceleration = 0.0d;
+    velocity = 0.0d; 
+    position = 0.0d;
+    obj_speed = 0.0d;
+  }
+  virtual void Update() 
+  {
+    acceleration = 0.0d;
+    obj_speed = 6.0d * word_speed;
+
+    // if key left:
+    acceleration = -obj_speed;
+    // if key right:
+    acceleration = obj_speed;
+
+    velocity += acceleration;
+    position += velocity * word_speed;
+  }
+  virtual void Print() 
+  {
+    std::cout <<"OBJ-Speed: " << std::setw( w ) << obj_speed
+	      <<"acc: "       << std::setw( w ) << acceleration
+	      <<"Vel: "       << std::setw( w ) << velocity
+	      <<"Pos: "       << std::setw( w ) << position;
+  }
+  double acceleration;
+  double velocity; 
+  double position;
+  double obj_speed;
+};
+
+
+
 int main()
 {
   Test_base* the_test;
@@ -112,7 +159,7 @@ int main()
       word_speed = ( 60.0d / FPS );// This is similar to 'DeltaTime'.
 
       // Which 'Test' to run:
-      the_test = new Test_3;// <--------------BUT-YOUR-TEST-HERE------
+      the_test = new Test_4;// <--------------BUT-YOUR-TEST-HERE------
 
       // This is simulating a game-loop.
       // It stimulates what happens in a 1 second time period.

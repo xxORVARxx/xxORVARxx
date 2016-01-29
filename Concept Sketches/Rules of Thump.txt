@@ -12,6 +12,8 @@
 
 - Favor object composition over class inheritance.
 
+- Make interface easy to use correctly and hard to use incorrectly.
+  How hard is enough? Ideally, uncompilable.
 
 -===- C++ -===-
 
