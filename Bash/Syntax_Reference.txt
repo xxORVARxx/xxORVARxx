@@ -1,0 +1,127 @@
+
+
+
+Bash, And Unix Shells In General, Interpret Result Codes Of Programs Like This:
+  Result Of 0 Is Interpreted As True (Or "No Error"),
+  And Any Other Result, Like 1, Is Interpreted As False (Or "Some Error Occurred").
+  (A Bit Unusual Way For C/C++ Programmers)
+
+
+
+Lists:
+
+  List Of Commands, Which Is Executed In A Subshell (Variable Assignments
+  In This Subshell Are Not Propagated Back):
+  ( ... )
+  
+  List Of Commands, Which Does Not Create A Subshell:
+  { ...; }
+
+  Simple Separator Of Commands In A List, But Can Also Be Replaced By A New-line:
+  ;
+
+  Separator Of Commands Executing The Second One Only When The First Returned 0(true):
+  &&
+
+  Separator Of Commands Executing The Second One Only When The First Returned Not-0:
+  ||
+
+  Separator Of Commands, Executing Both Commands In Parallel (The First One In Background):
+  &
+
+
+
+Here Are Useful Commands As Conditions For 'if' and 'while':
+
+  Simply A Command Which May Return 0(true) Or 1(false), (This Is A Buildin Of The Shell):
+  [ ... ]
+
+  Same As Above, Just Supports More, Like: <, >, And ( ... ) For Condition Nesting.
+  It Has A Special Syntactic Construct And Can Handle Expansions Inside A Bit Differently.
+  But The Whole Thing Is A Command That Returns 0(true) Or 1(false):
+  [[ ... ]]
+
+  See Details below:
+  (( ... ))
+
+
+
+C/C++ Style Integer Expressions:
+
+  Wrapper For An Arithmetic Expression (Or Several Of Them).
+    Returns The a Bool Result Of The Last Expression: 0(true) Or 1(false)
+    (( ... ))
+    Returns The Result Of The Last Expression:
+    $(( ... ))
+
+  -Unary:             ++, --, +, -, !, ~ (Like In C)
+  -Binary Arithmetic: ** (Exponentation), *, /, %, +, -
+  -Bit-Shift:         <<, >>
+  -Comparison:        <=, >=, <, >, ==, != (I Think These Return Either 1(true) Or 0(false))
+  -Bitwise:           &, ^, |
+  -Logical:           &&, ||, And Of Course The Ternary Operator: ... ? ... : ...
+  -Assignment:        =, *=, /=, %=, +=, -=, <<=, >>=, &=, ^=, |=
+  -Comma:             , (Simply Connects Two Expressions, Returning The Value Of The Last One)
+
+  a=$(( b + 9 ))
+  if (( i > 0 ))
+
+
+
+Integer Comparison:
+
+  Is Equal To:
+  if [ "$a" -eq "$b" ]
+
+  Is Not Equal To:
+  if [ "$a" -ne "$b" ]
+
+  Is Greater Than:
+  if [ "$a" -gt "$b" ]
+
+  Is Greater Than Or Equal To:
+  if [ "$a" -ge "$b" ]
+
+  Is Less Than:
+  if [ "$a" -lt "$b" ]
+
+  Is Less Than Or Equal To:
+  if [ "$a" -le "$b" ]
+
+  Is Less Than (Within Double Parentheses):
+  (("$a" < "$b"))
+
+  Is Less Than Or Equal To (Within Double Parentheses):
+  (("$a" <= "$b"))
+ 
+  Is Greater Than (Within Double Parentheses):
+  (("$a" > "$b"))
+
+  Is Greater Than Or Equal To (Within Double Parentheses):
+  (("$a" >= "$b"))
+
+
+
+String Comparison:
+
+  Is Equal To:
+  if [ "$a" = "$b" ]
+  if [ "$a" == "$b" ]
+
+  Is Not Equal To:
+  if [ "$a" != "$b" ]
+
+  Is Less Than, In ASCII Alphabetical Order:
+  if [[ "$a" < "$b" ]]
+  if [ "$a" \< "$b" ]
+
+  Is Greater Than, In ASCII Alphabetical Order:
+  if [[ "$a" > "$b" ]]
+  if [ "$a" \> "$b" ]
+
+  String Is Null, That Is, Has Zero Length:
+  if [ -z "$String" ]
+
+  String Is Not Null:
+  if [ -n "$String" ]
+  

@@ -1,0 +1,24 @@
+
+
+
+## Describe What You Are Testing:
+DESCRIPTION="Different ways of combining std::strings."
+
+## List Of Tests To Do: 
+TEST=(1 2 3 4)
+
+## How Many Times To Run The Executable Files:
+SAMPLES=100
+
+## How Much Work The Program Does:
+SIZE=1000
+
+## List Of Compiler Optimizations Flags:
+OPTIMIZE=('-O0' '-Os' '-O1')
+# Availabilities Are: ('-O0' '-Os' '-O1' '-O2' '-O3' '-Ofast')
+# '-O0'    This Is The Default.
+# '-Os'    Optimize For Size.
+# '-O1'    Level 1.
+# '-O2'    Level 2.
+# '-O3'    Level 3, This Is Recommended.
+# '-Ofast' Level 3 Plus Some Dangerous Stuff.
