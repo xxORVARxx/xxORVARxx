@@ -1,4 +1,7 @@
 
+/*  To Compile:
+ *    g++ -std=c++11 -O3 -o Tools/Find_average Tools/Find_average.cpp
+ */
 #include <iostream>
 #include <fstream>
 #include <limits>
@@ -47,8 +50,8 @@ int main( int argc, char* argv[] ) {
   if( argc == 2 )
     file_name = std::string( argv[1] );
   else {
-    std::cerr <<"Error When Finding Average, No Data-File Given, Input One File Name In Quotes!\n";
-    logger <<"Error When Finding Average, No Data-File Given, Input One File Name In Quotes!\n";
+    std::cerr <<"Error When Finding Average, No Data-File Given, Input One File-Name In Quotes!\n";
+    logger <<"Error When Finding Average, No Data-File Given, Input One File-Name In Quotes!\n";
     return -1;
   }
   // Open The File:
@@ -140,7 +143,7 @@ int main( int argc, char* argv[] ) {
   file.close();
   logger.close();
   // Done!
-  std::cout << the_average;
+  std::cout << the_average <<' ';
   return 0;
 }
 

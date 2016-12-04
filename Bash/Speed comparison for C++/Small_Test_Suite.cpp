@@ -1,4 +1,7 @@
 
+/*  To Compile:
+ *    g++ -std=c++11 -D_TEST=1 -D_SIZE=100 -o Small_Test_Suite Small_Test_Suite.cpp
+ */
 #include <iostream>
 #include <string>
 #include <chrono>
@@ -7,7 +10,7 @@
 
 
 int main( int argc, char* argv[] ) {
-  unsigned int size = SIZE;
+  unsigned int size = _SIZE;
   typedef std::chrono::high_resolution_clock clock;
   typedef std::chrono::duration< double, std::milli > ms;
   std::string str;
@@ -15,23 +18,23 @@ int main( int argc, char* argv[] ) {
 
   // Timer Start!
   auto t0 = clock::now();
-#if TEST==1
+#if _TEST==1
   for( unsigned int i = 0 ; i < size ; ++i ) {
     str = s1 + "This Is Test String Number: 2 \n" + " and This Is The Test String Number: 3 \n";
   }
-#elif TEST==2
+#elif _TEST==2
   for( unsigned int i = 0 ; i < size ; ++i ) {
     str = s1; 
     str += "This Is Test String Number: 2 \n";
     str += " and This Is The Test String Number: 3 \n";
   }
-#elif TEST==3
+#elif _TEST==3
   for( unsigned int i = 0 ; i < size ; ++i ) {
     str = s1; 
     str.append("This Is Test String Number: 2 \n");
     str.append(" and This Is The Test String Number: 3 \n");
   }
-#elif TEST==4
+#elif _TEST==4
   for( unsigned int i = 0 ; i < size ; ++i ) {
     std::ostringstream oss;
     oss << s1;

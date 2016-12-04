@@ -2,19 +2,24 @@
 
 
 ## Describe What You Are Testing:
-DESCRIPTION="Different ways of combining std::strings."
+_DESCRIPTION="What is the fastest way to add strings together."
+
+## And What Is Unit Of Measurement?
+_UNIT="ms"
+# Could Be:  ms, sec, Successes, Fails, Circles.
+
 
 ## List Of Tests To Do: 
-TEST=(1 2 3 4)
+_TEST=(1 2 3 4)
 
 ## How Many Times To Run The Executable Files:
-SAMPLES=100
+_SAMPLES=100
 
 ## How Much Work The Program Does:
-SIZE=1000
+_SIZE=1000
 
 ## List Of Compiler Optimizations Flags:
-OPTIMIZE=('-O0' '-Os' '-O1')
+_OPTIMIZE=('-O0' '-O1' '-O2' '-O3')
 # Availabilities Are: ('-O0' '-Os' '-O1' '-O2' '-O3' '-Ofast')
 # '-O0'    This Is The Default.
 # '-Os'    Optimize For Size.
@@ -22,3 +27,12 @@ OPTIMIZE=('-O0' '-Os' '-O1')
 # '-O2'    Level 2.
 # '-O3'    Level 3, This Is Recommended.
 # '-Ofast' Level 3 Plus Some Dangerous Stuff.
+
+
+## Compiler Options:
+_FLAGS="g++ -std=c++11"
+
+## Source Files With Your Test Program:
+_CPPS="*.cpp"
+# You Can Use: "~/my\ test/*.cpp"
+# Or: "'~/my\ test/f1.cpp' '~/my\ test/f2.cpp'".
