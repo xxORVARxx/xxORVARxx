@@ -89,7 +89,7 @@
 (add-to-list 'default-frame-alist '(width . 140))
 
 ;; Change font size:
-(set-face-attribute 'default nil :height 100)
+(set-face-attribute 'default nil :height 120)
 ;; The value is in 1/10pt, so 100 will give you 10pt, etc.
  
 ;; Add line numbers:
@@ -97,9 +97,39 @@
 
 ;; Whenever you open .h files, C++-mode will be used, not C-mode.
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+(add-to-list 'auto-mode-alist '("\\.as\\'" . c++-mode))
 
 ;; Disable the display of scroll bars:
 (scroll-bar-mode -1)
+
+;; Disable the menu bar.
+(menu-bar-mode -1)
+
+;; Disable the toolbar:
+(tool-bar-mode -1)
+
+
+
+;; --- --- C++ Syntax Higlighting --- ---
+;; See:
+;;   https://www.gnu.org/software/emacs/manual/html_node/elisp/Regular-Expressions.html#Regular-Expressions
+;;   https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html#Faces-for-Font-Lock
+
+;; This is for AngelScript's:  "A@ a;" and "A@[] a;" types:
+;;   (iF you are not using AngelScript, you can remove this)
+(font-lock-add-keywords 'c++-mode
+ `((,(concat
+   "\\<[_a-zA-Z][_a-zA-Z0-9]*\\>"       ; Object identifier.
+   "\\s *"                              ; Optional white space.
+   "\\(?:\\@\\|\\[\\]\\)"               ; The characters: '@' or '[]' must follow.
+   "\\s *"                              ; Optional white space.
+   "\\(?:\\@\\|\\[\\]\\)*"              ; any number of the characters: '@' and '[]'.
+   "\\s *"                              ; Optional white space.
+   "\\<\\([_a-zA-Z][_a-zA-Z0-9]*\\)\\>" ; Name identifier.
+   "\\s *") 
+    (0 'font-lock-type-face t)
+    (1 'font-lock-variable-name-face t)
+    )))
 
 
 
