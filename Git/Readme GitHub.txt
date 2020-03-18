@@ -114,15 +114,16 @@ There are three ways to tell Git which files or directories to ignore:
     
  
  
--===- Git Undo -===-   
-
+-===- Git Undo -===-
+- To 'pull' the GitHub-repository and make it overwrite/delete/ignore everything in your 
+  local working directory and all of your local commints:
+  (WARNING! All changes that you made since last 'push' will be permanently lost,
+   including your local commits!)
+    $git fetch --all
+    $git reset --hard origin/master
+    $git pull origin master 
+    
 - To undo all changes in your local repository and get you last commit: 
-  (all changes that you made since last commit will be permanently lost)
+  (WARNING! All changes that you made since last 'commit' will be permanently lost)
     $git checkout -- My_File_or_Directory
     $git checkout -- *.cpp *.h
-
-    
-    
-    
-    
-    
