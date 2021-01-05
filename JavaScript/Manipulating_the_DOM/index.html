@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The DOM JS</title>
+    <link rel="stylesheet" href="./style.css">
+    <!--the JS can be up here because of the 'DOMContentLoaded' event-listener.-->
+    <script src="./the_DOM.js"></script>
+</head>
+
+<body>
+    <!--all element IDs should be unique per document/page,-->
+    <!--but many elements can share the same classes.-->
+    <div class="c_wrapper" id="id_wrapper">
+        <header>
+            <div class="c_page-banner" id="id_page-banner">
+                <h1 class="c_title">Bookorama</h1>
+                <p>Books for Örvar</p>
+                <form class="c_search-books" id="id_search-books">
+                    <input type="text" placeholder="Search books..."/>
+                </form>
+            </div>
+        </header>
+        
+        <div class="c_book-list" id="id_book-list">
+            <h2 class="c_title">Books to Read</h2>
+            <ul>
+                <li>
+                    <span class="c_name">Name of the Wind</span>
+                    <span class="c_delete">delete</span>
+                </li>
+                <li>
+                    <span class="c_name">The Wise man's Fear</span>
+                    <span class="c_delete">delete</span>
+                </li>
+                <li>
+                    <span class="c_name">Kafka on the Shore</span>
+                    <span class="c_delete">delete</span>
+                </li>
+                <li>
+                    <span class="c_name">The Master and the Margarita</span>
+                    <span class="c_delete">delete</span>
+                </li>
+            </ul>
+        </div>
+        <form class="c_add-book" id="id_add-book">
+            <input type="text" placeholder="Add a book..."/>
+            <button>Add</button>
+        </form>
+
+        <div class="c_tabbed-content" id="id_tabbed-content">
+            <ul class="c_tabs">
+                <li data-d_the_target="#id_about" class="c_active">About</li>
+                <li data-d_the_target="#is_content">Contact</li>
+            </ul>
+            <div class="c_panel c_active" id="id_about">
+                <p>A book is a medium for recording information in the form of writing or images.</p>
+                <p>A book is prototypically a composition of such great length that it takes a considerable investment of time to compose and a still considerable, though not so extensive, investment of time to read. In a restricted sense, a book is a self-sufficient section or part of a longer composition, a usage that reflects the fact that, in antiquity, long works had to be written on several scrolls and each scroll had to be identified by the book it contained.</p>
+            </div>
+            <div class="c_panel" id="is_content">
+                <p>KEEP YOUR BOOK COLLECTION ORGANIZED...</p>
+                <p>it’s nice to get them organized. Whether you keep them all on display or have some stored in boxes, it’s helpful to have an inventory of them. Not all bookworms are librarians, though, so with this app you can make this kind of methodical organizing a task that can be done at home!</p>
+            </div>
+        </div>
+        <a href="https://www.google.com/" class="c_link">Click Here for Google!</a>
+    </div>
+    <!--adding the JS here so the document is fully loaded before we start make calling to the DOM.-->
+    <!--<script src="./the_DOM.js"></script>-->
+</body>
+</html>
