@@ -36,6 +36,8 @@ document.addEventListener("DOMContentLoaded", function(){
     custom_search_filter(); // <- Working!
     /*** 15 ***/
     tabbed_content(); // <- Working!
+    /*** 16 ***/
+    color_swatches();
 
 });
 
@@ -450,15 +452,16 @@ function checkboxes_and_change_events(){
     const my_label = document.createElement("label");
 
     // adding attributes and content to the elements:
+    my_div.setAttribute("class", "c_secondary-color-bg");
     my_checkbox.setAttribute("type", "checkbox");
     my_checkbox.setAttribute("id", "id_hide");
     my_label.setAttribute("for", "id_hide");
     my_label.textContent = "Hide all books";
 
     // setting the CSS-styles:
-    my_label.style.lineHeight = "5.2rem";
-    my_div.style.background = "lightgray";
+    my_div.style.borderRadius = "0.8rem";
     my_checkbox.style.width = "4rem";
+    my_label.style.lineHeight = "5.2rem";
 
     // linking the nodes:
     my_div.appendChild(my_checkbox);
@@ -545,19 +548,38 @@ function tabbed_content(){
                     panel.classList.remove("c_active");
                 }
             });
+
             // doing the same for the taps:
             Array.from(my_taps.children).forEach(function(tap){
                 if(tap === e.target){
                     // CSS-style:
-                    tap.style.background = "#9361bf";
+                    tap.setAttribute("class", "c_prime-color-bg");
                     tap.style.color = "white";
                 }else{
                     // CSS-style:
-                    tap.style.background = "#ddd";
+                    tap.setAttribute("class", "c_secondary-color-bg");
                     tap.style.color = "#444";
                 }
             });
         }
     });
+}
 
+
+
+/*** 16 ***/
+function color_swatches(){
+    const root = document.querySelector(":root");
+    const banner = document.querySelector("#id_wrapper #id_page-banner");
+
+    banner.addEventListener("click", function(e){
+        if(e.target.tagName === "SPAN"){
+            if(e.target.dataset.d_color === "d_prime"){
+                root.style.setProperty("--my-theme-prime-color", e.target.style.background);
+            }
+            else if(e.target.dataset.d_color === "d_secondary"){
+                root.style.setProperty("--my-theme-secondary-color", e.target.style.background);
+            }
+        }
+    });
 }
