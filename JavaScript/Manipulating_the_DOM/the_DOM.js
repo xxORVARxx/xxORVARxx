@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function(){
     /*** 15 ***/
     tabbed_content(); // <- Working!
     /*** 16 ***/
-    color_swatches();
+    color_swatches(); // <- Working!
 
 });
 
@@ -423,8 +423,8 @@ function create_element_with_submit_value_from_input_field(){
         e.preventDefault();
         // grabbing the value from the <input> field:
         const the_value = add_form.querySelector("input[type='text']").value;
-        // setting the <input> field to a empty string:
-        add_form.querySelector("input[type='text']").value = "";
+        // resetting the <input> field to a empty string:
+        add_form.reset();
 
         const the_li = document.createElement("li");
         const the_book_name = document.createElement("span");
@@ -569,12 +569,40 @@ function tabbed_content(){
 
 /*** 16 ***/
 function color_swatches(){
-    const root = document.querySelector(":root");
-    const banner = document.querySelector("#id_wrapper #id_page-banner");
+    // all color we want to be available go into the array:
+    const spans = [
+        {pos: "left",  color: "#9361bf"},
+        {pos: "left",  color: "#f06d06"},
+        {pos: "left",  color: "#3f3f3e"},
+        {pos: "right", color: "#eee"},
+        {pos: "right", color: "#f7f6af"},
+        {pos: "right", color: "#b9deed"}];
 
+    spans.forEach(function(span){
+        // 'destructuring' => get variables out of the object and into this scope:
+        const {pos, color} = span;
+        const swatche = document.createElement("span");
+        if(pos === "left"){
+            swatche.setAttribute("data-d_color", "d_prime");
+        }else if(pos === "right"){
+            swatche.setAttribute("data-d_color", "d_secondary");
+        }
+        swatche.style.background = color;
+        document.querySelector("#id_swatches_"+ pos).appendChild(swatche);
+    });
+
+    // the logic for the color swatches:
+    // in the CSS file, the ':root' contains our 'custom-properties' controlling the colors:
+    const root = document.querySelector(":root");
+    // the 'banner' in the parent object to all the swatches, and when a click event 
+    // happens it bubbles up and we catch it in the 'banner':
+    const banner = document.querySelector("#id_page-banner");
     banner.addEventListener("click", function(e){
+        // check if user clicked one of the <span> tags:
         if(e.target.tagName === "SPAN"){
             if(e.target.dataset.d_color === "d_prime"){
+                // changing the value of the CSS 'custom-propertie' to be the same 
+                // as the 'background' value of the <span> tag we clicked on:
                 root.style.setProperty("--my-theme-prime-color", e.target.style.background);
             }
             else if(e.target.dataset.d_color === "d_secondary"){

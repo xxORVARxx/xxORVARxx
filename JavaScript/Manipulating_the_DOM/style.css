@@ -123,6 +123,7 @@ h1, h2{
 .c_page-banner .c_swatches{
     display: inline-block;
     margin: 0rem 1rem;
+    border: 0.1rem solid lightgray;
     border-radius: 2rem;
 }
 
@@ -133,7 +134,6 @@ h1, h2{
 
 .c_page-banner .c_swatches.c_right{
     background: var(--my-theme-secondary-color);
-    border: 0.1rem solid lightgray;
     float: right;
 }
 
