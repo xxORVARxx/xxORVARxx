@@ -36,10 +36,12 @@
 /*** 8 ***/
 //the_fetch_API_request();
 /*** 9 ***/
-//async_and_await_for_readability();
+//basic_promise_example_with_async_and_await();
 /*** 10 ***/
-//async_and_await_returning_data();
+//async_and_await_for_readability();
 /*** 11 ***/
+//async_and_await_returning_data();
+/*** 12 ***/
 async_and_await_throwing_errors();
 
 
@@ -337,6 +339,29 @@ function the_fetch_API_request(){
 
 
 /*** 9 ***/
+// notice the 'async' keyword here:
+async function basic_promise_example_with_async_and_await(){
+    // the 'setTimeout()' function doesn't return a Promise so we wrap it in a promise:
+    function f_wait_for(delay){
+        return new Promise(function (resolve){
+            setTimeout(resolve, delay);
+        });
+    };
+
+    console.log("Start...");
+    await f_wait_for(2000);
+    console.log("...Finsh");
+
+    // and the old way would be like this:
+    console.log("Start, old way...");
+    f_wait_for(2000).then(function(){
+        console.log("...Finsh, old way");
+    });
+}
+
+
+
+/*** 10 ***/
 // https://www.youtube.com/watch?v=CWjNefiE47Y&list=PL4cUxeGkcC9jx2TTZk3IGWKSbtugYdrlu&index=10
 function async_and_await_for_readability(){
     // to make a function an Asynchronous function we use the 'async' keyword:
@@ -365,7 +390,7 @@ function async_and_await_for_readability(){
 
 
 
-/*** 10 ***/
+/*** 11 ***/
 function async_and_await_returning_data(){
     const getTodos = async () => {
         // Asynchronous function in another thread.
@@ -387,7 +412,7 @@ function async_and_await_returning_data(){
 
 
 
-/*** 11 ***/
+/*** 12 ***/
 function async_and_await_throwing_errors(){
     const getTodos = async (my_resource) => {
         // Asynchronous function in another thread.
