@@ -38,10 +38,12 @@
 /*** 9 ***/
 //basic_promise_example_with_async_and_await();
 /*** 10 ***/
-//async_and_await_for_readability();
+//wait_until_all_promises_have_completed();
 /*** 11 ***/
-//async_and_await_returning_data();
+//async_and_await_for_readability();
 /*** 12 ***/
+//async_and_await_returning_data();
+/*** 13 ***/
 async_and_await_throwing_errors();
 
 
@@ -350,18 +352,40 @@ async function basic_promise_example_with_async_and_await(){
 
     console.log("Start...");
     await f_wait_for(2000);
-    console.log("...Finsh");
+    console.log("...Done!");
 
     // and the old way would be like this:
     console.log("Start, old way...");
     f_wait_for(2000).then(function(){
-        console.log("...Finsh, old way");
+        console.log("...Done, old way!");
     });
 }
 
 
 
 /*** 10 ***/
+// notice the 'async' keyword here:
+async function wait_until_all_promises_have_completed(){
+    // this is the array we will 'map' through:
+    const wait_arr = [1000, 4000, 2000, 3000, 3100, 1100];
+    // this is the callback-function we use when 'map'ing the array:
+    async function on_wait(wait, i, arr){
+        await function(){
+            return new Promise(function(resolve){
+                setTimeout(resolve, wait);
+            });
+        }();
+        console.log(`Index: ${i} | Waited ${wait / 1000} sec.`);
+    }
+
+    console.log("Start...");
+    await Promise.all(wait_arr.map(on_wait));
+    console.log("...Done!  Finished all of the promises asynchronously!");
+}
+
+
+
+/*** 11 ***/
 // https://www.youtube.com/watch?v=CWjNefiE47Y&list=PL4cUxeGkcC9jx2TTZk3IGWKSbtugYdrlu&index=10
 function async_and_await_for_readability(){
     // to make a function an Asynchronous function we use the 'async' keyword:
@@ -390,7 +414,7 @@ function async_and_await_for_readability(){
 
 
 
-/*** 11 ***/
+/*** 12 ***/
 function async_and_await_returning_data(){
     const getTodos = async () => {
         // Asynchronous function in another thread.
@@ -412,7 +436,7 @@ function async_and_await_returning_data(){
 
 
 
-/*** 12 ***/
+/*** 13 ***/
 function async_and_await_throwing_errors(){
     const getTodos = async (my_resource) => {
         // Asynchronous function in another thread.
