@@ -246,11 +246,61 @@ function calculate_working_hours_between_dates(start, end, schedule){
     // skipping all the holidays and workdays that are not between 'start_date' and 'end_date':
     function f_next_date_in_array(arr, i, text = "date"){
         while((i < arr.length) && (arr[i].date < curr_date)){
-            //console.log(` --- Skipp ${text}:`, arr[i].date);
+            //console.log(` --- Skipp ${text}:`, arr[i].date.toDateString());
             i++;
         }
-        console.log(`Next ${text} at:`, (i < arr.length) ? arr[i].date : "Never");
+        console.log(`Next ${text} at:`, (i < arr.length) ? arr[i].date.toDateString() : "Never");
         return i;
+    }
+
+    // get the current weekdays:
+    function Timeline(schedule){
+        // ---PRIVATE---
+        // converting the date strings into date objects checking and the date is valid:
+        (function(){
+            // the timeline always need at least three things, and it's length is always an odd number:
+            if(schedule.timeline.length < 3 || (schedule.timeline.length % 2 === 0)){
+                throw new Error("In the 'timeline' we need at least three things, starting date, the name of the weekdays and an ending date. (in this order)");
+            }
+            for(let i = 0, last = null; i < schedule.timeline.length; i++){
+                if(i % 2 === 0){
+                    // check if the string representing the date is valid:
+                    let date = new Date(schedule.timeline[i]);
+                    if(isNaN(date.getTime())){
+                        throw new Error(`In the 'timeline', this: '${schedule.timeline[i]}' is not a valid date!`);
+                    }
+                    // the timeline need to be in an ascending order, from first to last:
+                    if(last && last >= date){
+                        throw new Error(`The 'timeline', need to be in an ascending order, from first to last! '${last.toDateString()}' can not be before '${date.toDateString()}' in the timeline!`);
+                    }
+                    last = date;
+                    // converting the string to date-object:
+                    schedule.timeline[i] = date;
+                }
+                else{
+                    // check if the string representing the weekdays is valid:
+                    const name_str = schedule.timeline[i];
+                    if( ! Array.isArray(schedule[name_str])){
+                        throw new Error(`In the 'timeline', there are no weekdays with this name: '${schedule.timeline[i]}'!`);
+                    }
+                }
+            }
+        })()
+        let curr_at = 0;
+        // ---PUBLIC---
+        this.check_range = function(start_date, end_date){
+            // the requested range for calculate the work hours needs to be within the timeline:
+            if(start_date < schedule.timeline[0] || schedule.timeline[schedule.timeline.length-1] < end_date){
+                throw new Error(`The 'timeline' starts at '${schedule.timeline[0].toDateString()} 00:00' and ends at '${schedule.timeline[schedule.timeline.length-1].toDateString()} 00:00', the requested range from '${start_date}' to '${end_date}' is not within this timeline!`);
+            }
+        }
+        this.get_current_weekdays = function(date){
+            // finding and returning the name of the current weekdays in the timeine:
+            while(curr_at + 2 < schedule.timeline.length && schedule.timeline[curr_at] <= date){
+                curr_at += 2;
+            }
+            return schedule.timeline[curr_at-1]
+        }
     }
 
     if(end <= start){
@@ -264,14 +314,21 @@ function calculate_working_hours_between_dates(start, end, schedule){
     // move over all holidays and workdays that have already passed the starting-date:
     let curr_holiday = f_next_date_in_array(schedule.holidays, 0, "holiday");
     let curr_workday = f_next_date_in_array(schedule.workdays, 0, "workday");
+    // find the right spot in the timeline:
+    const timeline = new Timeline(schedule.weekdays);
+    timeline.check_range(start, end);
 
     // loop over each day and calculate work hours:
     for(let day_number = 1; curr_date <= end_date; day_number++, curr_date.setDate(curr_date.getDate() + 1)){
-        console.log("\nDay number:", day_number, "Date is:", curr_date);
-        // get the current-date weekday-hours:
-        let weekday_hours = schedule.weekdays[curr_date.getDay()].working_hours;
+        // get the current weekdays from the 'timeline':
+        const weekdays_name_str = timeline.get_current_weekdays(curr_date);
+        const weekdays = schedule.weekdays[weekdays_name_str];
+        // get the current-date's weekday-hours:
+        let weekday_hours = weekdays[curr_date.getDay()].working_hours;
         // convert the current-date weekday-hours from string to date obj:
         weekday_hours = f_parse_str_hours_into_date_objs(weekday_hours, curr_date, "weekdays");
+
+        console.log("\nDay number:", day_number, "| Date is:", curr_date.toDateString(), "| Timeline:", weekdays_name_str);
 
         // is holiday:
         while(curr_holiday < schedule.holidays.length 
@@ -356,31 +413,49 @@ function calculate_working_hours_between_dates(start, end, schedule){
 
 
 
-
-const work_schedule_JSON =  '{"weekdays": ['+
-                              '{"day":"Sunday",    "working_hours":[]},'+
-                              '{"day":"Monday",    "working_hours":["08:15", "12:00", "13:00", "17:00"]},'+
-                              '{"day":"Tuesday",   "working_hours":["08:00", "12:00", "13:00", "17:00"]},'+
-                              '{"day":"Wednesday", "working_hours":["08:00", "12:00", "13:00", "17:00"]},'+
-                              '{"day":"Thursday",  "working_hours":["08:00", "12:00", "13:00", "17:00"]},'+
-                              '{"day":"Friday",    "working_hours":["08:00", "12:00", "12:30", "15:00"]},'+
-                              '{"day":"Saturday",  "working_hours":["11:00", "14:00"]}'+
-                            '], "holidays": ['+
+// '"timeline":["2021-1-1", "WINTER", "2021-4-22", "SUMMER", "2021-7-4", "CLOSED", "2021-7-18" "SUMMER" , "2021-10-23", "WINTER", "2022-4-21"],'+
+const work_schedule_JSON =  '{"weekdays":{'+
+                              '"timeline":["2021-3-1", "WINTER", "2021-3-6", "SUMMER", "2021-3-12", "CLOSED", "2021-3-18", "SUMMER", "2021-4-1"],'+
+                              '"WINTER": ['+
+                                '{"day":"Sunday",    "working_hours":[]},'+
+                                '{"day":"Monday",    "working_hours":["08:15", "12:00", "13:00", "17:00"]},'+
+                                '{"day":"Tuesday",   "working_hours":["08:00", "12:00", "13:00", "17:00"]},'+
+                                '{"day":"Wednesday", "working_hours":["08:00", "12:00", "13:00", "17:00"]},'+
+                                '{"day":"Thursday",  "working_hours":["08:00", "12:00", "13:00", "17:00"]},'+
+                                '{"day":"Friday",    "working_hours":["08:00", "12:00", "12:30", "15:00"]},'+
+                                '{"day":"Saturday",  "working_hours":["11:00", "14:00"]}'+
+                              '], "SUMMER": ['+
+                                '{"day":"Sunday",    "working_hours":[]},'+
+                                '{"day":"Monday",    "working_hours":["10:15", "12:00", "13:00", "16:00"]},'+
+                                '{"day":"Tuesday",   "working_hours":["10:00", "12:00", "13:00", "16:00"]},'+
+                                '{"day":"Wednesday", "working_hours":["12:00", "14:00"]},'+
+                                '{"day":"Thursday",  "working_hours":["10:00", "12:00", "13:00", "16:00"]},'+
+                                '{"day":"Friday",    "working_hours":["10:00", "12:00", "12:30", "14:00"]},'+
+                                '{"day":"Saturday",  "working_hours":[]}'+
+                              '], "CLOSED": ['+
+                                '{"day":"Sunday",    "working_hours":[]},'+
+                                '{"day":"Monday",    "working_hours":[]},'+
+                                '{"day":"Tuesday",   "working_hours":[]},'+
+                                '{"day":"Wednesday", "working_hours":[]},'+
+                                '{"day":"Thursday",  "working_hours":[]},'+
+                                '{"day":"Friday",    "working_hours":[]},'+
+                                '{"day":"Saturday",  "working_hours":[]}'+
+                              ']'+
+                            '}, "holidays": ['+
                               '{"date":"2021-2-01", "details":"", "freetime_hours":["06:00", "18:00"]},'+
                               '{"date":"2021-2-02", "details":"", "freetime_hours":["06:00", "18:00"]},'+
                               '{"date":"2021-2-04", "details":"", "freetime_hours":["06:00", "18:00"]},'+
                               '{"date":"2021-2-06", "details":"", "freetime_hours":["06:00", "18:00"]},'+
-
                               '{"date":"2021-3-08", "details":"", "freetime_hours":["11:15", "18:00"]},'+
                               '{"date":"2021-3-10", "details":"", "freetime_hours":["08:30", "09:30", "11:00", "11:30", "15:00", "16:00"]},'+
                               '{"date":"2021-3-12", "details":"", "freetime_hours":["08:00", "08:30", "11:30", "12:00", "12:30", "13:00", "14:30", "15:00"]},'+
-
                               '{"date":"2021-11-01", "details":"", "freetime_hours":["00:00", "24:00"]},'+
                               '{"date":"2021-11-08", "details":"", "freetime_hours":["00:00", "24:00"]},'+
                               '{"date":"2021-11-03", "details":"", "freetime_hours":["00:00", "24:00"]},'+
                               '{"date":"2021-12-13", "details":"", "freetime_hours":["09:00", "15:00"]},'+
                               '{"date":"2021-12-09", "details":"", "freetime_hours":["00:00", "24:00"]},'+
                               '{"date":"2021-12-24", "details":"Jól", "freetime_hours":["11:00", "24:00"]}'+
+
                             '], "workdays": ['+
                               '{"date":"2021-11-27", "details":"Black Friday #2", "working_hours":["00:00", "02:00"]},'+
                               '{"date":"2021-11-26", "details":"Black Friday #1", "working_hours":["06:00", "24:00"]},'+
@@ -391,11 +466,15 @@ const work_schedule_JSON =  '{"weekdays": ['+
 
 
 
+
+
+
+
 let work_schedule_obj = null;
 try {
     work_schedule_obj = JSON.parse(work_schedule_JSON, function(key, value){
         // converting the date strings into date objects:
-        return (key == "date") ? new Date(value) : value;
+        return (key === "date") ? new Date(value) : value;
     });
 }
 catch(error){
@@ -406,8 +485,8 @@ work_schedule_obj.holidays.sort(function(d1, d2){ return d1.date - d2.date; });
 work_schedule_obj.workdays.sort(function(d1, d2){ return d1.date - d2.date; });
 
 // arguments: year, month{0-11}, day, hours, minutes, seconds, milliseconds
-const start_work = new Date(Date.UTC(2021, 3-1, 8, 8, 55, 0, 0));
-const end_work = new Date(Date.UTC(2021, 3-1, 12, 16, 45, 0, 0));
+const start_work = new Date(Date.UTC(2021, 3-1, 1, 8, 55, 0, 0));
+const end_work = new Date(Date.UTC(2021, 3-1, 31, 16, 45, 0, 0));
 try {
     calculate_working_hours_between_dates(start_work, end_work, work_schedule_obj);
 }
