@@ -159,59 +159,48 @@ function calculate_working_hours_between_dates(start, end, schedule){
     // where the durations overlap each other, arrB is subtracted from arrA:
     function f_subtract_date_arrB_from_date_arrA(arrA, arrB){
         // there are 6 ways the durations can overlap:
-        //  B B1 A A1    B A B1 A1    B A A1 B1   (B = arrB duration start, B1 = arrB duration end).
-        //  A A1 B B1    A B A1 B1    A B B1 A1   (A = arrA duration start, A1 = arrA duration end).
+        //  Bs Be As Ae    Bs As Be Ae    Bs As Ae Be   (Bs = arrB duration start, Be = arrB duration end).
+        //  As Ae Bs Be    As Bs Ae Be    As Bs Be Ae   (As = arrA duration start, Ae = arrA duration end).
         //  >>time>>>    >>time>>>    >>time>>>
-        let iA = 0;
-        let iB = 0;
-        while((iA < arrA.length)&&(iB < arrB.length)){
-            if(arrB[iB] <= arrA[iA]){
-                //  B ? ? ?  ||  B=A ? ?
-                if(arrB[iB+1] <= arrA[iA]){
-                    //  B B1<=A A1
-                    iB += 2;
-                }
-                else if(arrA[iA+1] <= arrB[iB+1]){
-                    //  B A A1<=B1
-                    arrA.splice(iA, 2);
-                    //  B B1
-                }
-                else if(arrB[iB+1] <= arrA[iA+1]){
-                    //  B A B1<=A1
-                    arrA[iA] = new Date(arrB[iB+1].getTime());
-                    //  B B1=A A1
-                    iB += 2;
-                }
-                else{
-                    throw new Error(`no match found... (subtract B) something is wrong! iA:${iA} iB:${iB}`);
+        const result_arr = new Array();
+        const merge_arr = new Array();
+        // merge 'arrA' and 'arrB' to one array:
+        arrA.forEach(function(date){ merge_arr.push({name: "A", date: date}); });
+        arrB.forEach(function(date){ merge_arr.push({name: "B", date: date}); });
+        // sorting the two combine arrrays in ascending chronological order:
+        merge_arr.sort(function(d1, d2){
+            const diff = d1.date - d2.date;
+            if(diff === 0){
+                d1.name = d2.name = "AB";
+            }
+            return diff; 
+        });
+        let A_active = false, B_active = false, AB_active = false;
+        merge_arr.forEach(function(obj){
+            if(obj.name === "A"){
+                A_active = !A_active;
+                if( ! B_active){
+                    result_arr.push(obj.date);
                 }
             }
-            else{
-                //  A ? ? ?
-                if(arrA[iA+1] <= arrB[iB]){
-                    //  A A1<=B B1
-                    iA += 2;
-                }
-                else if(arrA[iA+1] <= arrB[iB+1]){
-                    //  A B A1<=B1
-                    arrA[iA+1] = new Date(arrB[iB].getTime());
-                    //  A A1=B B1
-                    iA += 2;
-                }
-                else if(arrB[iB+1] < arrA[iA+1]){
-                    //  A B B1<A1
-                    let Aend = new Date(arrB[iB].getTime()); //<- 'Ae'.
-                    let Astart = new Date(arrB[iB+1].getTime()); //<- 'As'.
-                    arrA.splice(iA+1, 0, Aend, Astart);
-                    //  A Ae=B B1=As A1
-                    iA += 2;
-                    iB += 2;
-                }
-                else {
-                    throw new Error(`no match found... (subtract A) something is wrong! iA:${iA} iB:${iB}`);
+            else if(obj.name === "B"){
+                B_active = !B_active;
+                if(A_active){
+                    result_arr.push(obj.date);
                 }
             }
-        }
+            else if(obj.name === "AB"){
+                if(AB_active){
+                    A_active = !A_active;
+                    B_active = !B_active;
+                    if(A_active !== B_active){
+                        result_arr.push(obj.date);
+                    }
+                }
+                AB_active = !AB_active;
+            }
+        });
+        return result_arr;
     }
 
     function f_add_date_arrB_to_date_arrA(arrA, arrB){
@@ -244,48 +233,64 @@ function calculate_working_hours_between_dates(start, end, schedule){
     }
 
     // skipping all the holidays and workdays that are not between 'start_date' and 'end_date':
-    function f_next_date_in_array(arr, i, text = "date"){
-        while((i < arr.length) && (arr[i].date < curr_date)){
-            //console.log(` --- Skipp ${text}:`, arr[i].date.toDateString());
-            i++;
+    function Date_finder(arr, text = "date"){
+        // ---CONSTRUCTOR---
+        // sorting the arrays based on the dates:
+        arr.sort(function(d1, d2){ return d1.date - d2.date; });
+        // ---PRIVATE---
+        let curr_at = 0;
+        // ---PUBLIC---
+        this.get_index = function(){ return curr_at; }
+        this.find_next_date = function(date){
+            while((curr_at < arr.length) && (arr[curr_at].date < date)){
+                //console.log(` --- Skipp ${text}:`, arr[curr_at].date.toDateString());
+                curr_at++;
+            }
+            console.log(`Next ${text} at:`, (curr_at < arr.length) ? arr[curr_at].date.toDateString() : "Never");
+            return (curr_at < arr.length) ? arr[curr_at] : null;
         }
-        console.log(`Next ${text} at:`, (i < arr.length) ? arr[i].date.toDateString() : "Never");
-        return i;
+        this.is_next = function(date){
+            if(curr_at < arr.length && arr[curr_at].date.getTime() === date.getTime()){
+                // move on to the next date:
+                curr_at++;
+                return arr[curr_at-1];
+            }
+            return (curr_at < arr.length) ? false : null;
+        }
     }
 
-    // get the current weekdays:
+    // get the current weekdays based on the timeline:
     function Timeline(schedule){
-        // ---PRIVATE---
+        // ---CONSTRUCTOR---
+        // the timeline always need at least three things, and it's length is always an odd number:
+        if(schedule.timeline.length < 3 || (schedule.timeline.length % 2 === 0)){
+            throw new Error("In the 'timeline' we need at least three things, starting date, the name of the weekdays and an ending date. (in this order)");
+        }
         // converting the date strings into date objects checking and the date is valid:
-        (function(){
-            // the timeline always need at least three things, and it's length is always an odd number:
-            if(schedule.timeline.length < 3 || (schedule.timeline.length % 2 === 0)){
-                throw new Error("In the 'timeline' we need at least three things, starting date, the name of the weekdays and an ending date. (in this order)");
-            }
-            for(let i = 0, last = null; i < schedule.timeline.length; i++){
-                if(i % 2 === 0){
-                    // check if the string representing the date is valid:
-                    let date = new Date(schedule.timeline[i]);
-                    if(isNaN(date.getTime())){
-                        throw new Error(`In the 'timeline', this: '${schedule.timeline[i]}' is not a valid date!`);
-                    }
-                    // the timeline need to be in an ascending order, from first to last:
-                    if(last && last >= date){
-                        throw new Error(`The 'timeline', need to be in an ascending order, from first to last! '${last.toDateString()}' can not be before '${date.toDateString()}' in the timeline!`);
-                    }
-                    last = date;
-                    // converting the string to date-object:
-                    schedule.timeline[i] = date;
+        for(let i = 0, last = null; i < schedule.timeline.length; i++){
+            if(i % 2 === 0){
+                // check if the string representing the date is valid:
+                let date = new Date(schedule.timeline[i]);
+                if(isNaN(date.getTime())){
+                    throw new Error(`In the 'timeline', this: '${schedule.timeline[i]}' is not a valid date!`);
                 }
-                else{
-                    // check if the string representing the weekdays is valid:
-                    const name_str = schedule.timeline[i];
-                    if( ! Array.isArray(schedule[name_str])){
-                        throw new Error(`In the 'timeline', there are no weekdays with this name: '${schedule.timeline[i]}'!`);
-                    }
+                // the timeline need to be in an ascending order, from first to last:
+                if(last && last >= date){
+                    throw new Error(`The 'timeline', need to be in an ascending order, from first to last! '${last.toDateString()}' can not be before '${date.toDateString()}' in the timeline!`);
+                }
+                last = date;
+                // converting the string to date-object:
+                schedule.timeline[i] = date;
+            }
+            else{
+                // check if the string representing the weekdays is valid:
+                const name_str = schedule.timeline[i];
+                if( ! Array.isArray(schedule[name_str])){
+                    throw new Error(`In the 'timeline', there are no weekdays with this name: '${schedule.timeline[i]}'!`);
                 }
             }
-        })()
+        }
+        // ---PRIVATE---
         let curr_at = 0;
         // ---PUBLIC---
         this.check_range = function(start_date, end_date){
@@ -296,24 +301,27 @@ function calculate_working_hours_between_dates(start, end, schedule){
         }
         this.get_current_weekdays = function(date){
             // finding and returning the name of the current weekdays in the timeine:
-            while(curr_at + 2 < schedule.timeline.length && schedule.timeline[curr_at] <= date){
+            while((curr_at + 2 < schedule.timeline.length )&& schedule.timeline[curr_at] <= date){
                 curr_at += 2;
             }
             return schedule.timeline[curr_at-1]
         }
     }
 
+    // ---START---
     if(end <= start){
         throw new Error("The start-date must be before the end-date!");
     }
-    let total_working_hours = 0;
+    let total_working_time = 0;
     // getting 'start' and 'end' dates without hours, minutes, seconds and milliseconds:
     let start_date = new Date(start.getUTCFullYear(), start.getMonth(), start.getUTCDate());
     let end_date = new Date(end.getUTCFullYear(), end.getMonth(), end.getUTCDate());
     let curr_date = new Date(start_date.getTime());
     // move over all holidays and workdays that have already passed the starting-date:
-    let curr_holiday = f_next_date_in_array(schedule.holidays, 0, "holiday");
-    let curr_workday = f_next_date_in_array(schedule.workdays, 0, "workday");
+    const workday_finder = new Date_finder(schedule.workdays, "workday");
+    workday_finder.find_next_date(curr_date);
+    const holiday_finder = new Date_finder(schedule.holidays, "holiday");
+    holiday_finder.find_next_date(curr_date);
     // find the right spot in the timeline:
     const timeline = new Timeline(schedule.weekdays);
     timeline.check_range(start, end);
@@ -331,31 +339,28 @@ function calculate_working_hours_between_dates(start, end, schedule){
         console.log("\nDay number:", day_number, "| Date is:", curr_date.toDateString(), "| Timeline:", weekdays_name_str);
 
         // is holiday:
-        while(curr_holiday < schedule.holidays.length 
-            && schedule.holidays[curr_holiday].date.getTime() === curr_date.getTime()){
-                let holiday_hours = schedule.holidays[curr_holiday].freetime_hours;
-                console.log("  Holiday hours:", holiday_hours);
-                // get 'holiday_hours' as array of date objects, instead of array of strings:
-                holiday_hours = f_parse_str_hours_into_date_objs(holiday_hours, curr_date, "holidays");
-                // remove weekday-work-hours if they are on holiyday-time:
-                f_subtract_date_arrB_from_date_arrA(weekday_hours, holiday_hours);
-                // move on to the next holiday:
-                curr_holiday++;
+        let holiday = holiday_finder.is_next(curr_date);
+        while(Boolean(holiday)){
+            // get 'holiday_hours' as array of date objects, instead of array of strings:
+            const holiday_hours = f_parse_str_hours_into_date_objs(holiday.freetime_hours, curr_date, "holidays");
+            console.log("  Holiday hours:", holiday_hours);
+            // remove weekday-work-hours if they are on holiyday-time:
+            weekday_hours = f_subtract_date_arrB_from_date_arrA(weekday_hours, holiday_hours);
+            // move on to the next holiday:
+            holiday = holiday_finder.is_next(curr_date);
         }
 
         // is workday:
-        while(curr_workday < schedule.workdays.length 
-            && schedule.workdays[curr_workday].date.getTime() === curr_date.getTime()){
-                let workday_hours = schedule.workdays[curr_workday].working_hours;
-                console.log("  Workday hours:", workday_hours);
-                // get 'workday_hours' as array of date objects, instead of array of strings:
-                workday_hours = f_parse_str_hours_into_date_objs(workday_hours, curr_date, "workdays");
-                // add the workday-hours to the weekday-work-hours:
-                weekday_hours = f_add_date_arrB_to_date_arrA(weekday_hours, workday_hours);
-                // move on to the next workday:
-                curr_workday++;
+        let workday = workday_finder.is_next(curr_date);
+        while(Boolean(workday)){
+            // get 'workday_hours' as array of date objects, instead of array of strings:
+            const workday_hours = f_parse_str_hours_into_date_objs(workday.working_hours, curr_date, "workdays");
+            console.log("  Workday hours:", workday_hours);
+            // add the workday-hours to the weekday-work-hours:
+            weekday_hours = f_add_date_arrB_to_date_arrA(weekday_hours, workday_hours);
+            // move on to the next workday:
+            workday = workday_finder.is_next(curr_date);
         }
-
 
         // is first day:
         // if current-date is the starting-date, we need to remove all work-hours the are before the start-time:
@@ -406,8 +411,20 @@ function calculate_working_hours_between_dates(start, end, schedule){
             weekday_hours.splice(i, weekday_hours.length);
         }
 
-        console.log("Weekday hours:", weekday_hours, "\n");
+        // calculating the total hours for the current date:
+        let curr_date_msec = 0;
+        for(let i = 0; i < weekday_hours.length; i += 2){
+            curr_date_msec += weekday_hours[i+1].getTime() - weekday_hours[i].getTime();
+        }
+        const curr_date_hours = Math.floor(curr_date_msec * 0.001 * (1/60) * (1/60));
+        const curr_date_minutes = Math.floor((curr_date_msec * 0.001 * (1/60)) % 60);
+        console.log("  Weekday hours:", weekday_hours, "\n");
+        console.log("  Total weekday time is", curr_date_hours, "hours and", curr_date_minutes, "minutes.\n");
+        total_working_time += curr_date_msec;
     }
+    const total_hours = Math.floor(total_working_time * 0.001 * (1/60) * (1/60));
+    const total_minutes = Math.floor((total_working_time * 0.001 * (1/60)) % 60);
+    return { "hours": total_hours, "minutes": total_minutes, "msec": total_working_time };
 }
 
 
@@ -415,7 +432,7 @@ function calculate_working_hours_between_dates(start, end, schedule){
 
 // '"timeline":["2021-1-1", "WINTER", "2021-4-22", "SUMMER", "2021-7-4", "CLOSED", "2021-7-18" "SUMMER" , "2021-10-23", "WINTER", "2022-4-21"],'+
 const work_schedule_JSON =  '{"weekdays":{'+
-                              '"timeline":["2021-3-1", "WINTER", "2021-3-6", "SUMMER", "2021-3-12", "CLOSED", "2021-3-18", "SUMMER", "2021-4-1"],'+
+                              '"timeline":["2021-3-1", "WINTER", "2021-3-16", "SUMMER", "2021-3-18", "CLOSED", "2021-3-22", "SUMMER", "2021-4-1"],'+
                               '"WINTER": ['+
                                 '{"day":"Sunday",    "working_hours":[]},'+
                                 '{"day":"Monday",    "working_hours":["08:15", "12:00", "13:00", "17:00"]},'+
@@ -442,13 +459,20 @@ const work_schedule_JSON =  '{"weekdays":{'+
                                 '{"day":"Saturday",  "working_hours":[]}'+
                               ']'+
                             '}, "holidays": ['+
-                              '{"date":"2021-2-01", "details":"", "freetime_hours":["06:00", "18:00"]},'+
+                              '{"date":"2021-3-04", "details":"", "freetime_hours":["06:00", "18:00"]},'+
                               '{"date":"2021-2-02", "details":"", "freetime_hours":["06:00", "18:00"]},'+
-                              '{"date":"2021-2-04", "details":"", "freetime_hours":["06:00", "18:00"]},'+
-                              '{"date":"2021-2-06", "details":"", "freetime_hours":["06:00", "18:00"]},'+
-                              '{"date":"2021-3-08", "details":"", "freetime_hours":["11:15", "18:00"]},'+
-                              '{"date":"2021-3-10", "details":"", "freetime_hours":["08:30", "09:30", "11:00", "11:30", "15:00", "16:00"]},'+
-                              '{"date":"2021-3-12", "details":"", "freetime_hours":["08:00", "08:30", "11:30", "12:00", "12:30", "13:00", "14:30", "15:00"]},'+
+                              '{"date":"2021-2-10", "details":"", "freetime_hours":["06:00", "18:00"]},'+
+                              '{"date":"2021-2-02", "details":"", "freetime_hours":["06:00", "18:00"]},'+
+                              '{"date":"2021-3-04", "details":"For", "freetime_hours":["16:00", "18:00"]},'+
+
+                              '{"date":"2021-3-09", "details":"Sex", "freetime_hours":["10:00", "10:33"]},'+
+                              '{"date":"2021-3-10", "details":"For", "freetime_hours":["08:00", "10:10"]},'+
+                              '{"date":"2021-3-12", "details":"Sex", "freetime_hours":["12:30", "15:55"]},'+
+
+                              '{"date":"2021-4-08", "details":"", "freetime_hours":["09:10", "11:33"]},'+
+                              '{"date":"2021-4-10", "details":"", "freetime_hours":["08:30", "09:30", "11:00", "11:30", "15:00", "16:00"]},'+
+                              '{"date":"2021-4-12", "details":"", "freetime_hours":["08:00", "08:30", "11:30", "12:00", "12:30", "13:00", "14:30", "15:00"]},'+
+
                               '{"date":"2021-11-01", "details":"", "freetime_hours":["00:00", "24:00"]},'+
                               '{"date":"2021-11-08", "details":"", "freetime_hours":["00:00", "24:00"]},'+
                               '{"date":"2021-11-03", "details":"", "freetime_hours":["00:00", "24:00"]},'+
@@ -459,9 +483,9 @@ const work_schedule_JSON =  '{"weekdays":{'+
                             '], "workdays": ['+
                               '{"date":"2021-11-27", "details":"Black Friday #2", "working_hours":["00:00", "02:00"]},'+
                               '{"date":"2021-11-26", "details":"Black Friday #1", "working_hours":["06:00", "24:00"]},'+
-                              '{"date":"2021-03-08", "details":"", "working_hours":["07:00", "23:59"]},'+
-                              '{"date":"2021-03-10", "details":"", "working_hours":["12:30", "23:09"]},'+
-                              '{"date":"2021-03-12", "details":"", "working_hours":["12:55", "24:00"]}'+
+                              '{"date":"2021-04-08", "details":"", "working_hours":["07:00", "23:59"]},'+
+                              '{"date":"2021-04-10", "details":"", "working_hours":["12:30", "23:09"]},'+
+                              '{"date":"2021-04-12", "details":"", "working_hours":["12:55", "24:00"]}'+
                             ']}';
 
 
@@ -480,20 +504,18 @@ try {
 catch(error){
     console.warn("Error Parsing JSON! ", error);
 }
-// sorting the arrays based on the dates:
-work_schedule_obj.holidays.sort(function(d1, d2){ return d1.date - d2.date; });
-work_schedule_obj.workdays.sort(function(d1, d2){ return d1.date - d2.date; });
 
 // arguments: year, month{0-11}, day, hours, minutes, seconds, milliseconds
-const start_work = new Date(Date.UTC(2021, 3-1, 1, 8, 55, 0, 0));
-const end_work = new Date(Date.UTC(2021, 3-1, 31, 16, 45, 0, 0));
+const start_work = new Date(Date.UTC(2021, 3-1, 6, 8, 55, 0, 0));
+const end_work = new Date(Date.UTC(2021, 3-1, 13, 16, 45, 0, 0));
+let total_time = null;
 try {
-    calculate_working_hours_between_dates(start_work, end_work, work_schedule_obj);
+    total_time = calculate_working_hours_between_dates(start_work, end_work, work_schedule_obj);
 }
 catch(error){
     console.warn("Error calculate working hours! ", error);
 }
-
+console.log("Total working time from", start_work, "to", end_work, "is\n", total_time.hours, "hours and", total_time.minutes, "minutes.");
 
 // https://riptutorial.com/javascript/topic/265/date
 // https://riptutorial.com/javascript/example/1476/create-a-new-date-object
