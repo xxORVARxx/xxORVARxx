@@ -34,8 +34,6 @@ function date_printer(language, options_obj = null){
     }
 }
 
-
-
 const my_printer = date_printer("en-GB");
 console.log("my printer: ", my_printer.print(new Date()));
 // https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
@@ -48,67 +46,71 @@ console.log("my printer: timezone: Europe/London: ", my_printer.print_date_in_an
 
 
 
-function duration_between_two_dates(d1, d2, rounding_function){
-    const duration_msec = Math.abs(d2 - d1);
-    let obj = {
-        duration_in_years: rounding_function(duration_msec / (1000 * 60 * 60 * 24 * 365)),
-        duration_in_days: rounding_function(duration_msec / (1000 * 60 * 60 * 24)),
-        duration_in_hours: rounding_function(duration_msec / (1000 * 60 * 60)),
-        duration_in_minutes: rounding_function(duration_msec / (1000 * 60)),
-        duration_in_seconds: rounding_function(duration_msec / 1000),
-        duration_in_milliseconds: duration_msec
+
+function Duration_between_two_dates(d1, d2 = null){
+    // ---CONSTRUCTOR---
+    let duration_msec;
+    if(d2){
+        duration_msec = Math.abs(d2 - d1);
+    }
+    else if(Object.prototype.toString.call(d1) === "[object Date]" && ! isNaN(d1.getTime())){
+        duration_msec = d1.getTime();
+    }
+    else{
+        duration_msec = d1;
+    }
+    const obj = {
+        "years": Math.floor(duration_msec * 0.001 * (1/60) * (1/60) * (1/24) * (1/365)),
+        "days": Math.floor((duration_msec * 0.001 * (1/60) * (1/60) * (1/24)) % 365),
+        "hours": Math.floor((duration_msec * 0.001 * (1/60) * (1/60)) % 24),
+        "minutes": Math.floor((duration_msec * 0.001 * (1/60)) % 60),
+        "seconds": Math.floor((duration_msec * 0.001) % 60),
+        "milliseconds": Math.floor(duration_msec % 1000)
     };
-    // years:
-    obj.years = Math.floor(duration_msec / (1000 * 60 * 60 * 24 * 365));
-    let left = duration_msec - (obj.years * (1000 * 60 * 60 * 24 * 365));
-    // days:
-    obj.days = Math.floor(left / (1000 * 60 * 60 * 24));
-    left -= obj.days * (1000 * 60 * 60 * 24);
-    // hours:
-    obj.hours = Math.floor(left / (1000 * 60 * 60));
-    left -= obj.hours * (1000 * 60 * 60);
-    // minutes:
-    obj.minutes = Math.floor(left / (1000 * 60));
-    left -= obj.minutes * (1000 * 60);
-    // seconds:
-    obj.seconds = Math.floor(left / 1000);
-    left -= obj.seconds * 1000;
-    // milliseconds:
-    obj.milliseconds = Math.floor(left);
-    return obj;
+    let str = `${obj.years > 0 ? (obj.years === 1 ? "1 year, " : `${obj.years} years, `) : ""}`;
+    str += `${obj.days > 0 ? (obj.days === 1 ? "1 day, " : `${obj.days} days, `) : ""}`;
+    str += `${obj.hours > 0 ? (obj.hours === 1 ? "1 hour, " : `${obj.hours} hours, `) : ""}`;
+    str += `${obj.minutes > 0 ? (obj.minutes === 1 ? "1 minute, " : `${obj.minutes} minutes, `) : ""}`;
+    str += `${obj.seconds > 0 ? (obj.seconds === 1 ? "1 second, " : `${obj.seconds} seconds, `) : ""}`;
+    str += `${obj.milliseconds > 0 ? (obj.milliseconds === 1 ? "1 millisecond, " : `${obj.milliseconds} milliseconds, `) : ""}`;
+    let i = str.lastIndexOf(", ");
+    str = str.slice(0, i);
+    i = str.lastIndexOf(", ");
+    str = str.substring(0, i) + " and" + str.substring(i+1, str.length);
+
+    // ---PUBLIC---
+    this.years = function(){ return obj.years; }
+    this.days = function(){ return obj.days; }
+    this.hours = function(){ return obj.hours; }
+    this.minutes = function(){ return obj.minutes; }
+    this.seconds = function(){ return obj.seconds; }
+    this.milliseconds = function(){ return obj.milliseconds; }
+    this.print = function(){ return str; }
 }
-
-
 
 // Z == UTC (Universal Time Coordinated) == GMT (Greenwich Mean Time).
 const date1 = new Date("2025-04-15T06:30:30Z");
 const date2 = new Date("2020-05-20T18:45:45Z");
 
 // arguments: year, month{0-11}, day, hours, minutes, seconds, milliseconds
-const date11 = new Date(Date.UTC(2025, 4-1, 15, 6, 30, 30, 750));
-const date22 = new Date(Date.UTC(2020, 5-1, 20, 18, 45, 45, 500));
+const date11 = new Date(Date.UTC(2021, 5-1, 20, 7, 30, 45, 500));
+const date22 = new Date(Date.UTC(2020, 4-1, 15, 6, 30, 30, 750));
 
 const date111 = new Date(Date.UTC(2020, 4-1, 20, 18, 30, 45, 750));
 const date222 = new Date(Date.UTC(2020, 4-1, 20, 18, 30, 30, 500));
 
-/*
-console.log("Duration obj: ceil:", duration_between_two_dates(date1, date2, Math.ceil));
-console.log("Duration obj: ceil:", duration_between_two_dates(date11, date22, Math.ceil));
-console.log("Duration obj: ceil:", duration_between_two_dates(date111, date222, Math.ceil));
-console.log("Duration obj: floor:", duration_between_two_dates(date1, date2, Math.floor));
-console.log("Duration obj: floor:", duration_between_two_dates(date11, date22, Math.floor));
-console.log("Duration obj: floor:", duration_between_two_dates(date111, date222, Math.floor));
-*/
+console.log("Duration 1-2:", new Duration_between_two_dates(date1, date2).print());
+console.log("Duration 11-22:", new Duration_between_two_dates(date11, date22).print());
+console.log("Duration 111-222:", new Duration_between_two_dates(date111, date222).print());
+console.log("Since midnight Jan 1, 1970 is:", new Duration_between_two_dates(new Date).print());
+console.log("150.000.000 is:", new Duration_between_two_dates(150000000).print(), "\n\n");
 
+// my_data = new Date();  creates a new 'date' object with the current date and time from the user's browser.
+// let msec = Date.parse('2018-01-01');  will convert this date to milliseconds.
+// let now_data = new Date(msec);  will use the milliseconds and convert it to 'date' object.
 
-// my_data = new Date(); creates a new 'date' object with the current date and time from the user's browser
-// let msec = Date.parse('2018-01-01'); will convert this date to milliseconds.
-// let now_data = new Date(msec); will use the milliseconds and convert it to 'date' object.
-
-// .now(); Returns the number of milliseconds since midnight Jan 1, 1970.
-// .setTime(); Sets a date to a specified number of milliseconds after/before January 1, 1970.
-
-
+// .getTime();  (or .now();) Returns the number of milliseconds since midnight Jan 1, 1970.
+// .setTime();  Sets a date to a specified number of milliseconds after/before January 1, 1970.
 
 
 
@@ -266,7 +268,7 @@ function calculate_working_hours_between_dates(start, end, schedule){
         if(schedule.timeline.length < 3 || (schedule.timeline.length % 2 === 0)){
             throw new Error("In the 'timeline' we need at least three things, starting date, the name of the weekdays and an ending date. (in this order)");
         }
-        // converting the date strings into date objects checking and the date is valid:
+        // converting the date strings into date objects and checking if the date is valid:
         for(let i = 0, last = null; i < schedule.timeline.length; i++){
             if(i % 2 === 0){
                 // check if the string representing the date is valid:
@@ -429,10 +431,10 @@ function calculate_working_hours_between_dates(start, end, schedule){
 
 
 
-
+// '"timeline":["2021-3-1", "WINTER", "2021-3-16", "SUMMER", "2021-3-18", "CLOSED", "2021-3-22", "SUMMER", "2021-4-1"],'+
 // '"timeline":["2021-1-1", "WINTER", "2021-4-22", "SUMMER", "2021-7-4", "CLOSED", "2021-7-18" "SUMMER" , "2021-10-23", "WINTER", "2022-4-21"],'+
 const work_schedule_JSON =  '{"weekdays":{'+
-                              '"timeline":["2021-3-1", "WINTER", "2021-3-16", "SUMMER", "2021-3-18", "CLOSED", "2021-3-22", "SUMMER", "2021-4-1"],'+
+                              '"timeline":["2021-1-1", "WINTER", "2021-4-22", "SUMMER", "2021-7-4", "CLOSED", "2021-7-18","SUMMER" , "2021-10-23", "WINTER", "2022-4-21"],'+
                               '"WINTER": ['+
                                 '{"day":"Sunday",    "working_hours":[]},'+
                                 '{"day":"Monday",    "working_hours":["08:15", "12:00", "13:00", "17:00"]},'+
@@ -506,8 +508,8 @@ catch(error){
 }
 
 // arguments: year, month{0-11}, day, hours, minutes, seconds, milliseconds
-const start_work = new Date(Date.UTC(2021, 3-1, 6, 8, 55, 0, 0));
-const end_work = new Date(Date.UTC(2021, 3-1, 13, 16, 45, 0, 0));
+const start_work = new Date(Date.UTC(2021, 2-1, 20, 8, 55, 0, 0));
+const end_work = new Date(Date.UTC(2021, 12-1, 24, 16, 45, 0, 0));
 let total_time = null;
 try {
     total_time = calculate_working_hours_between_dates(start_work, end_work, work_schedule_obj);
@@ -515,7 +517,9 @@ try {
 catch(error){
     console.warn("Error calculate working hours! ", error);
 }
-console.log("Total working time from", start_work, "to", end_work, "is\n", total_time.hours, "hours and", total_time.minutes, "minutes.");
+console.log(`\nTotal working time from '${my_printer.print(start_work)}' to '${my_printer.print(end_work)}' is`);
+console.log(`${total_time.hours} hours and ${total_time.minutes} minutes. If put in days it's equal to `);
+console.log(new Duration_between_two_dates(total_time.msec).print());
 
 // https://riptutorial.com/javascript/topic/265/date
 // https://riptutorial.com/javascript/example/1476/create-a-new-date-object
