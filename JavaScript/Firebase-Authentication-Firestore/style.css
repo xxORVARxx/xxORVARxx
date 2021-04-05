@@ -1,0 +1,244 @@
+/**** Definition of Units: ****/
+/* 'px' - An absolute unit of measurement (like in, pt, or cm).
+ *      - All absolute measurements are related to each other: 1cm is always 37.8px.
+ *      - Note that 1cm is almost never actually a physical centimeter in screen-based media.
+ * 'em' - A relative unit of measurement. (unit relative to the 'PARENT'-element font-size).
+ *      - Without any CSS at all: 1em == 16px == 0.17in == 12pt == 1pc == 4.2mm == 0.42cm.
+ *      - The 'em' units will multiply with the inherent 'em' when applied to font-size.
+ *      - When used with 'padding', 'margin' and other, it won't multiply with the inherent 'em'.
+ *      - if the font-size changes at any level in the document, 1em becomes the new font-size.
+ *      - Parent:font-size 2em{ Parent: font-size 2em{ Element: font-size 2em{ is 8em == 128px }}}
+ * 'rem' - A relative unit of measurement. (unit relative to the 'ROOT'-element font-size)
+ *       - The same as 'em' but will NOT multiply with the inherent 'rem' or 'em'.
+ * '%' - Is based on the length of the same property of the parent element.
+ * 'vw' - 'Viewport-width' unit, 1vw is equal to 1% of the width of the viewport.
+ * 'vh' - 'Viewport-height' unit, 1vh is equal to 1% of the height of the viewport.
+ * 'vmin' - This value will be whichever is smaller at the moment, vw or vh.
+ */
+
+/**** Position and Layout: ****/
+/* The 'position' Property:
+ * 'static' - This is the default value.
+ *          - Are NOT affected by 'top', 'bottom', 'left', and 'right' properties.
+ *          - It is always positioned according to the normal flow of the page.
+ * 'relative' - The element is positioned relative to its normal position.
+ *            - Can by adjusted away from its normal position with 'top'...'right' properties.
+ *            - When adjusted away, other content will not fit into any gap left by the element.
+ * 'absolute' - The element is positioned absolutely to its first 'positioned'-parent.
+ *            - Note: 'positioned'-element is when the position is NOT 'static'.
+ *            - Works well with 'relative'-parent, but 'static', it moves along with page scrolling.
+ * 'fixed' - The element is positioned related to the browser window.
+ *         - 'top'...'right' properties are used to position the element.
+ *         - Does not leave a gap in the page where it would normally have been located.
+ * 'sticky' - The element is positioned based on the user's scroll position.
+ *          - A sticky element toggles between 'relative' and 'fixed'.
+ */
+/* The 'display' Property:
+ * 'block' - Starts on a new line, and takes up the whole width (like <p>).
+ * 'inline' - Any height and width properties will have no effect (like <span>).
+ * 'inline-block' - Formatted as an inline element, but you can apply height and width values.
+ * 'none' - The element is completely removed.
+ * 'initial' - Sets this property to its default value.
+ * 'inherit' - Inherits this property from its parent element.
+ */
+
+/**** Pseudo Classes: ****/
+/* It is used to style elements when they are in a particular state.
+ * ':hover'.
+ * ':focus'.
+ * ':first-child'.
+ * ':valid'.
+ */
+
+/**** Pseudo Elements: ****/
+/* '::first-line'.
+ */
+
+/**** Custom Properties: ****/
+/* CSS Variables == Custom Properties.
+ * it looks like this: '--my-property: value;'.
+ */
+
+
+
+
+
+/**** Variables: ****/
+:root{
+    /* root variables are available in the whole document.*/
+    /* in this document the 'root' tag is the '<html>' tag.*/
+
+    /* set the font-size to 62.5% to makes it easier to working with 'rem'.*/
+    /* 62.5% font-size is equal to 10px and 1rem in most browsers*/
+    font-size: 62.5%; /* 62.5% == 10px == 1rem */
+
+    --my-theme-prime-color: #9361bf;
+    --my-theme-secondary-color: rgb(92, 92, 92);
+
+    /*--my-testing-border: none;*/ --my-testing-border: 1px solid black;
+}
+
+
+
+body{
+    font-family: Tahoma;
+    background: #333;
+    color: rgb(233, 233, 233);
+    letter-spacing: 0.1rem;
+}
+
+h1, h2{
+    font-weight: normal;
+    text-align: center;
+}
+
+.c_wrapper{
+    width: 90%;
+    max-width: 96rem;
+    margin: 2rem auto;
+    border-radius: 0.8rem;
+    box-shadow: 0rem 0.1rem 0.6rem rgba(255, 255, 255, 0.2);
+    box-sizing: border-box;
+    padding: 0rem 0rem 2rem;
+    overflow: hidden;
+    border: 0.1rem solid rgb(92, 92, 92)
+}
+
+.c_page-banner{
+    background: var(--my-theme-secondary-color);
+    padding: 1rem 0rem;
+    text-align: center;
+}
+
+
+
+.c_modal{
+    background: #333;
+    width: 75%;
+    max-width: 50rem;
+    margin: 2rem auto;
+    padding: 0.5rem;
+    border-radius: 0.8rem;
+    box-shadow: 0rem 0.1rem 0.6rem rgba(255, 255, 255, 0.2);
+}
+
+.c_input-field{
+    background: var(--my-theme-secondary-color);
+    border-radius: 0.6rem;
+    width: 75%;
+    margin: 1rem auto;
+}
+
+.c_input-field label{
+    display: block;
+    background: #333;
+    border-radius: 0.6rem;
+    border: 0.1rem solid var(--my-theme-secondary-color);
+    padding: 0.6rem 0rem;
+    text-align: center;
+}
+
+.c_input-field input{
+    display: block;
+    background: var(--my-theme-secondary-color);
+    color: white;
+    border-radius: 0rem 0rem 0.6rem 0.6rem;
+    width: 100%;
+    padding: 0.5rem 0rem;
+    box-shadow: none;
+    border:none;
+    text-align: center;
+    cursor: pointer;
+}
+
+.c_modal button{
+    display: block;
+    background: var(--my-theme-prime-color);
+    color: white;
+    width: 75%;
+    margin: 1rem auto;
+    padding: 0.5rem;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    box-shadow: none;
+    border:none;
+}
+
+.c_input-range{
+    width: 75%;
+    margin: 1rem auto;
+}
+
+.c_input-range input{
+    display: block;
+    box-sizing: border-box;
+    width: 75%;
+    float: left;
+    clear: both;
+    margin-right: 5%;
+    cursor: pointer;
+}
+
+.c_input-range span{
+    /*float: left;*/
+    display: inline-block;
+    margin: 0.4rem 0rem;
+}
+
+.c_input-range::after{
+    content: "";
+    display: block;
+    clear: both;
+}
+
+
+
+.c_book-list, .c_add-book{
+    margin: 3rem;
+}
+
+.c_book-list ul{
+    list-style-type: none;
+    padding: 0;
+}
+
+.c_book-list li{
+    padding: 2rem;
+    border-left: 0.5rem solid var(--my-theme-secondary-color);
+    margin: 2rem 1rem;
+}
+
+.c_book-list li:hover{
+    border-color: var(--my-theme-prime-color);
+}
+
+.c_book-list li span{
+    padding: 0.6rem;
+}
+
+.c_button{
+    float: right;
+    background: var(--my-theme-prime-color);
+    margin-right: 1rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    color: white;
+}
+
+.c_button:hover{
+    background: var(--my-theme-secondary-color);
+}
+
+
+
+.c_error_text{
+    color: palevioletred;
+    font-weight: bold;
+    margin: 3rem 0rem;
+}
+
+.c_successful_text{
+    color: springgreen;
+    font-weight: bold;
+    margin: 3rem 0rem;
+}

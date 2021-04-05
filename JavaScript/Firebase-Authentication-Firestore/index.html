@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bookorama | Firebase Authentication</title>
+    <link rel="stylesheet" href="./style.css">
+    <!--The JS can be up here because of the 'DOMContentLoaded' event-listener.-->
+    <!--But-->
+</head>
+
+<body>
+    <div class="c_wrapper" id="id_wrapper">
+        <header>
+            <div class="c_page-banner" id="id_page-banner">
+                <h1>Bookorama</h1>
+                <p id="id_nickname">Books for you</p>
+                <p id="id_email"></p>
+           
+                 <!--SIGN UP MODAL-->
+                <form class="c_modal c_auth-logged-out" id="id_signup-form" style="display: none;">
+                    <h2>Sign up</h2>
+                    <div class="c_input-field">
+                        <label for="id_signup-email">Email address</label>
+                        <input type="email" id="id_signup-email" required />
+                    </div>
+                    <div class="c_input-field">
+                        <label for="id_signup-password">Your password</label>
+                        <input type="password" id="id_signup-password" required />
+                    </div>
+                    <div class="c_input-field">
+                        <label for="id_signup-password-again">Your password again</label>
+                        <input type="password" id="id_signup-password-again" required />
+                    </div>
+                    <div class="c_input-field">
+                        <label for="id_signup-nickname">Nickname</label>
+                        <input type="text" id="id_signup-nickname" required />
+                    </div>
+                    <button>Sign up</button>
+                    <h2 class="c_error_text"></h2>
+                </form>
+
+                <!--LOGIN MODAL-->
+                <form class="c_modal c_auth-logged-out" id="id_login-form" style="display: none;">
+                    <h2>Login</h2>
+                    <div class="c_input-field">
+                        <label for="id_login-email">Email address</label>
+                        <input type="email" id="id_login-email" required />
+                    </div>
+                    <div class="c_input-field">
+                        <label for="id_login-password">Your password</label>
+                        <input type="password" id="id_login-password" required />
+                    </div>
+                    <button>Login</button>
+                    <h2 class="c_error_text"></h2>
+                </form>
+
+                <!--LOGOUT MODAL-->
+                <form class="c_modal c_auth-logged-in" id="id_logout-form" style="display: none;">
+                    <h2>Logout</h2>
+                    <button>Logout</button>
+                    <h2 class="c_error_text"></h2>
+                </form>
+
+            </div>
+        </header>
+
+        <div class="c_book-list" id="id_book-list">
+            <h2>Good books to Read...</h2>
+            <ul>
+                <!-- This is how to book's data looks like when loaded from firestore:
+                <li data-d_book_id="1234567890abcdeABCDE">
+                    <span class="c_name">The Master and the Margarita</span>
+                    <span class="c_rating">6/10</span>
+                    <span class="c_button" name="n_delete_button">delete</span>
+                    <span class="c_button" name="n_edit_button">edit</span>
+                    <br>
+                    <span class="c_author">user.uid</span>
+                </li>
+                -->
+            </ul>
+        </div>
+
+        <!--ADD BOOK MODAL-->
+        <form class="c_modal c_auth-logged-in" id="id_add-book-form" style="display: none;">
+            <h2>Add Book</h2>
+            <div class="c_input-field">
+                <label for="id_book-name">Book Name</label>
+                <input type="text" id="id_book-name" required />
+            </div>
+            <div class="c_input-range">
+                <input type="range" id="id_slider" min="0" max="10" value="5">
+                <span id="id_value"></span>
+                <span>/10</span>
+            </div>
+            <button>Add Book</button>
+            <h2 class="c_error_text"></h2>
+            <h2 class="c_successful_text"></h2>
+            <script>// JavaScript for the <input> range slider:
+                const the_slider = document.getElementById("id_slider");
+                const output_value = document.getElementById("id_value");
+                output_value.innerHTML = the_slider.value;
+                the_slider.oninput = function(){
+                    output_value.innerHTML = this.value;
+                }
+            </script>
+        </form>
+
+    </div>
+    <div style="height: 40vh;"></div>
+
+    <!--The core Firebase JS SDK is always required and must be listed first:-->
+    <script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-app.js"></script>
+    <!--Add SDKs for Firebase products that you want to use: -->
+    <!--https://firebase.google.com/docs/web/setup#available-libraries-->
+    <script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-firestore.js"></script>
+    <!--<script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-functions.js"></script>-->
+    <!--<script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-messaging.js"></script>-->
+    <!--<script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-storage.js"></script>-->
+    <!--<script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-performance.js"></script>-->
+    <!--<script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-database.js"></script>-->
+    <!--<script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-remote-config.js"></script>-->
+
+    <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        var firebaseConfig = {
+            apiKey: "AIzaSyDdH5OW9RFBSWcPSDkbnWLTtGRu9gDlZY0",
+            authDomain: "bookorama-7c64b.firebaseapp.com",
+            projectId: "bookorama-7c64b",
+            //storageBucket: "bookorama-7c64b.appspot.com",
+            //messagingSenderId: "81949990544",
+            appId: "1:81949990544:web:ebe280f7d8f95e33870215",
+            measurementId: "G-JQW4CNKE56"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
+        // Make 'auth' and 'firestore' references:
+        const fb_auth = firebase.auth();
+        const fb_store = firebase.firestore();
+        //const fb_func = firebase.functions();
+
+        // Update firestore settings:
+        fb_store.settings({ timestampsInSnapshots: true });
+    </script>
+
+    <!--My JavaScript files:-->
+    <script src="./firebase_authentication.js"></script>
+
+</body>
+</html>
