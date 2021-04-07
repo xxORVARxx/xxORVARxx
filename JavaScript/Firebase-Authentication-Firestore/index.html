@@ -67,46 +67,56 @@
             </div>
         </header>
 
-        <div class="c_book-list" id="id_book-list">
+        <main>
             <h2>Good books to Read...</h2>
-            <ul>
-                <!-- This is how to book's data looks like when loaded from firestore:
-                <li data-d_book_id="1234567890abcdeABCDE">
-                    <span class="c_name">The Master and the Margarita</span>
-                    <span class="c_rating">6/10</span>
-                    <span class="c_button" name="n_delete_button">delete</span>
-                    <span class="c_button" name="n_edit_button">edit</span>
-                    <br>
-                    <span class="c_author">user.uid</span>
-                </li>
-                -->
-            </ul>
-        </div>
-
-        <!--ADD BOOK MODAL-->
-        <form class="c_modal c_auth-logged-in" id="id_add-book-form" style="display: none;">
-            <h2>Add Book</h2>
-            <div class="c_input-field">
-                <label for="id_book-name">Book Name</label>
-                <input type="text" id="id_book-name" required />
+            <div class="c_modal c_welcomebanner" id="id_welcomebanner" style="display: none;">
+                <h1>Welcome to Bookorama!</h1>
+                <p>Where users can share their favourite books.</p>
+                <p>Here below is a list of book people have shared and rated:</p>
+                <h2></h2>
+                <p>At the bottom of the page is a form where you can add your books.</p>
             </div>
-            <div class="c_input-range">
-                <input type="range" id="id_slider" min="0" max="10" value="5">
-                <span id="id_value"></span>
-                <span>/10</span>
+    
+            <div class="c_book-list" id="id_book-list">
+                <ul>
+                    <!-- This is how to book's data looks like when loaded from firestore:
+                    <li data-d_book_id="1234567890abcdeABCDE">
+                        <span class="c_name">The Master and the Margarita</span>
+                        <span class="c_rating">6/10</span>
+                        <span class="c_button" name="n_delete_button">delete</span>
+                        <span class="c_button" name="n_edit_button">edit</span>
+                        <br>
+                        <span class="c_author">user.uid</span>
+                    </li>
+                    -->
+                </ul>
             </div>
-            <button>Add Book</button>
-            <h2 class="c_error_text"></h2>
-            <h2 class="c_successful_text"></h2>
-            <script>// JavaScript for the <input> range slider:
-                const the_slider = document.getElementById("id_slider");
-                const output_value = document.getElementById("id_value");
-                output_value.innerHTML = the_slider.value;
-                the_slider.oninput = function(){
-                    output_value.innerHTML = this.value;
-                }
-            </script>
-        </form>
+    
+            <!--ADD BOOK MODAL-->
+            <form class="c_modal c_auth-logged-in" id="id_add-book-form" style="display: none;">
+                <h2>Add Book</h2>
+                <div class="c_input-field">
+                    <label for="id_book-name">Book Name</label>
+                    <input type="text" id="id_book-name" required />
+                </div>
+                <div class="c_input-range">
+                    <input type="range" id="id_slider" min="0" max="10" value="5">
+                    <span id="id_value"></span>
+                    <span>/10</span>
+                </div>
+                <button>Add Book</button>
+                <h2 class="c_error_text"></h2>
+                <h2 class="c_successful_text"></h2>
+                <script>// JavaScript for the <input> range slider:
+                    const the_slider = document.getElementById("id_slider");
+                    const output_value = document.getElementById("id_value");
+                    output_value.innerHTML = the_slider.value;
+                    the_slider.oninput = function(){
+                        output_value.innerHTML = this.value;
+                    }
+                </script>
+            </form>
+        </main>
 
     </div>
     <div style="height: 40vh;"></div>

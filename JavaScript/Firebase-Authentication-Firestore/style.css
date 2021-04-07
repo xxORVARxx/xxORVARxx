@@ -122,6 +122,12 @@ h1, h2{
     box-shadow: 0rem 0.1rem 0.6rem rgba(255, 255, 255, 0.2);
 }
 
+.c_welcomebanner{
+    background: var(--my-theme-prime-color);
+    text-align: center;
+    text-shadow: 0rem 0rem 0.5rem black;
+}
+
 .c_input-field{
     background: var(--my-theme-secondary-color);
     border-radius: 0.6rem;
@@ -241,4 +247,10 @@ h1, h2{
     color: springgreen;
     font-weight: bold;
     margin: 3rem 0rem;
+}
+
+.c_prime_text{
+    font-weight: bolder;
+    font-size: 1.3rem;
+    text-shadow: 0rem 0rem 0.5rem var(--my-theme-prime-color);
 }

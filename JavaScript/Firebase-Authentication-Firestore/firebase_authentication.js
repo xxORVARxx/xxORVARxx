@@ -6,6 +6,10 @@
 document.addEventListener("DOMContentLoaded", function(){
     // Asynchronous callback function.
 
+    /***  Global-Data: ***/
+    let g_user_fs_data = null;
+    var unsubscribe_listener = null;
+
     /*** 1 ***/
     signup_create_user_with_email();
 
@@ -14,36 +18,41 @@ document.addEventListener("DOMContentLoaded", function(){
 
     /*** 3 ***/
     logout_user();
-
+    
     // this 'onAuthStateChanged' event heppens every time user logs-in, -out or signes-up,
     // if user is logged-in we get the 'credentials' but if user is logged-out we get 'null'.
     fb_auth.onAuthStateChanged(function(user){
         // Asynchronous callback function.
-
+        
         /*** 4 ***/
         auth_state_conditional_DOMContent(user);
 
         /*** 5 ***/
-        update_user_bio(user);
+        get_data_from_firestore_and_update_user_bio(user, function(fs_data){
+            // Asynchronous callback function.
+            g_user_fs_data = fs_data;
 
-        var unsubscribe = null;
+            /*** 6 ***/
+            display_welcomebanner_for_first_time_users(user, fs_data);
+
+        });
         if(user){
             // user is signed in.
 
-            /*** 6 ***/
+            /*** 7 ***/
             add_new_books_to_firestore_database(user);    
 
-            /*** 7 ***/
+            /*** 8 ***/
             handling_DOMs_delete_and_edit_buttons(user);
 
             // getting data from firestore (the books), using a realtime-listener,
             // this means that every time the data changes on the firestore-database
             // the callback-function is executed and we will reload the content with
             // the newest snapshot of the database:
-            unsubscribe = fb_store.collection("fs_books").onSnapshot(function(snapshot){
+            unsubscribe_listener = fb_store.collection("fs_books").onSnapshot(function(snapshot){
                 // Asynchronous callback function.
 
-                /*** 8 ***/
+                /*** 9 ***/
                 display_content_from_firestore(user, snapshot.docs);
 
             }, function(err){
@@ -57,13 +66,13 @@ document.addEventListener("DOMContentLoaded", function(){
         }
         else{
             // user NOT signed in.
-            if(unsubscribe){
+            if(unsubscribe_listener){
                 // stop listening to changes on the firestore-database:
-                unsubscribe();
-                unsubscribe = null;
+                unsubscribe_listener();
+                unsubscribe_listener = null;
             }
 
-            /*** 9 ***/
+            /*** 10 ***/
             display_content_for_unauthorized_users();
 
         }
@@ -79,6 +88,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
 /*** 1 ***/
 function signup_create_user_with_email(){
+
     function f_error_reset(signup_form){
         signup_form.querySelector(".c_error_text").innerHTML = "";
     }
@@ -150,6 +160,7 @@ function signup_create_user_with_email(){
 
 /*** 2 ***/
 function login_user_with_email(){
+
     function f_error_reset(login_form){
         login_form.querySelector(".c_error_text").innerHTML = "";
     }
@@ -172,6 +183,7 @@ function login_user_with_email(){
             // using email and password from form to login user with firebase-auth:
             const the_credential = await fb_auth.signInWithEmailAndPassword(email, password);
 
+            // not a first-time user anymore:
             await f_update_user_info(the_credential);
         } 
         catch(err){
@@ -191,7 +203,8 @@ function login_user_with_email(){
 
 
 /*** 3 ***/
-function logout_user(){
+function logout_user(user){
+
     function f_error_reset(logout_form){
         logout_form.querySelector(".c_error_text").innerHTML = "";
     }
@@ -239,10 +252,11 @@ function auth_state_conditional_DOMContent(user){
 
 
 /*** 5 ***/
-async function update_user_bio(user){
+async function get_data_from_firestore_and_update_user_bio(user, f_welcome_banner){
     // Asynchronous function.
     const nickname = document.querySelector("#id_nickname");
     const email = document.querySelector("#id_email");
+    let data = null;
     if(user){
         try{
             // seting-up the document we want to get. It's in the collection: 'fs_users' 
@@ -251,10 +265,11 @@ async function update_user_bio(user){
             // now we will fetch the data from the 'document' on the firestore database:
             const fb_data = await fb_doc.get();
             // to extracted the data from the 'DocumentSnapshot' use '.get("my_field")' or:
-            const data = fb_data.data();
+            data = fb_data.data();
 
             nickname.innerHTML = `Books for ${data.fs_nickname}!`;
             email.innerHTML = data.fs_email;
+
         }
         catch(err){
             // handle errors here.
@@ -266,12 +281,32 @@ async function update_user_bio(user){
         nickname.innerHTML = "Books for you";
         email.innerHTML = "";
     }
+    // calling the calback-function:
+    f_welcome_banner(data);
 }
 
 
 
 /*** 6 ***/
+async function display_welcomebanner_for_first_time_users(user, fs_data){
+    // Asynchronous callback function.
+    const h2_header = document.querySelector("main h2");
+    const welcomebanner = document.querySelector("#id_welcomebanner");
+    if(user && fs_data && fs_data.fs_first_time){
+        h2_header.style.display = "none";
+        welcomebanner.style.display = "block";
+    }
+    else{
+        h2_header.style.display = "block";
+        welcomebanner.style.display = "none";
+    }
+}
+
+
+
+/*** 7 ***/
 function add_new_books_to_firestore_database(user){
+
     function f_error_reset(){
         add_form.querySelector(".c_error_text").innerHTML = "";
     }
@@ -318,7 +353,7 @@ function add_new_books_to_firestore_database(user){
 
 
 
-/*** 7 ***/
+/*** 8 ***/
 function handling_DOMs_delete_and_edit_buttons(user){
     const book_list = document.querySelector("#id_book-list ul");
     book_list.addEventListener("click", async function(e){
@@ -351,8 +386,9 @@ function handling_DOMs_delete_and_edit_buttons(user){
 
 
 
-/*** 8 ***/
+/*** 9 ***/
 function display_content_from_firestore(user, doc_array){
+
     function f_create_span(the_content, classes_array, the_name = null){
         const span = document.createElement("span");
         span.textContent = the_content;
@@ -366,7 +402,7 @@ function display_content_from_firestore(user, doc_array){
     function f_create_content(doc_data, book_id){
         const li = document.createElement("li");
         li.setAttribute("data-d_book_id", book_id);
-        li.appendChild(f_create_span(doc_data.fs_title, ["c_name"]));
+        li.appendChild(f_create_span(doc_data.fs_title, ["c_name", "c_prime_text"]));
         li.appendChild(f_create_span(`${doc_data.fs_rating}/10`, ["c_rating"]));
         if(user.uid === doc_data.fs_owner_id){
             li.appendChild(f_create_span("delete", ["c_button"], "n_delete_button"));
@@ -377,7 +413,8 @@ function display_content_from_firestore(user, doc_array){
         return li;
     }
 
-    const h2_header = document.querySelector("#id_book-list h2");
+    const h2_header = document.querySelector("main h2");
+    const h2_banner = document.querySelector("#id_welcomebanner h2");
     const book_list = document.querySelector("#id_book-list ul");
     book_list.innerHTML = "";
     if(doc_array == null){
@@ -385,6 +422,7 @@ function display_content_from_firestore(user, doc_array){
     }
     else if(doc_array.length > 0){
         h2_header.innerHTML = `There are ${doc_array.length} books in the database!`;
+        h2_banner.innerHTML = h2_header.innerHTML;
 
         doc_array.forEach(function(doc){
             // getting the data as an object from the 'docs' from the 'snapshots' from the database:
@@ -395,14 +433,15 @@ function display_content_from_firestore(user, doc_array){
     }
     else{
         h2_header.innerHTML = "Be the first to add books to the database!";
+        h2_banner.innerHTML = h2_header.innerHTML;
     }
 }
 
 
 
-/*** 9 ***/
+/*** 10 ***/
 function display_content_for_unauthorized_users(){
-    const h2_header = document.querySelector("#id_book-list h2");
+    const h2_header = document.querySelector("main h2");
     const ul_list = document.querySelector("#id_book-list ul");
 
     h2_header.innerHTML = "Login to add your books to the database!";
