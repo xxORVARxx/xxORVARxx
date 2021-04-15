@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function(){
     // Asynchronous callback function.
 
     /***  Global-Data: ***/
-    let g_user_fs_data = null;
+    let g_user_fs_data = {};
     var unsubscribe_listener = null;
 
     /*** 1 ***/
@@ -27,10 +27,39 @@ document.addEventListener("DOMContentLoaded", function(){
         /*** 4 ***/
         auth_state_conditional_DOMContent(user);
 
+        // https://medium.com/@naveenkarippai/learning-how-references-work-in-javascript-a066a4e15600
+        // - there are NO pointers in JS! and references are NOT pointers.
+        // - references can only point at it's values and can NOT point at other variables or references.
+        // - references are pointers to value, stored in a variables.
+        // - reassign a variable will create a NEW reference!
+        // primitive types: (Number, String, Boolean, undefined, null, Symbol):
+        //  - are assigned-by-value.
+        //  - are unchangeable / immutable / 'const'.
+        // compound types: (Object, Array):
+        //  - are assigned-by-reference.
+        //  - changeable / mutable
+        // reassignment of variables containing references, will creates a new reference and the old is lost!
+        // there are two ways to copy/clone compound types: shallow-copy and deep-copy.
+        // - shallow-copy is a bit-wise copy of an object.
+        //   If any of the fields of the object are references to other objects, just the reference 
+        //   addresses are copied i.e., only the memory address is copied.
+        //   the 'Object.assign()' method is a sort of shallow-copy but it will invoke getters and setters.
+        // - deep-copy is when an object is copied along with all the objects to which it refers.
+
         /*** 5 ***/
         get_data_from_firestore_and_update_user_bio(user, function(fs_data){
             // Asynchronous callback function.
-            g_user_fs_data = fs_data;
+
+            // if user is logged out remove all data from 'g_user_fs_data':
+            for(let key in g_user_fs_data){
+                delete g_user_fs_data[key];
+            }
+            // shallow-copying from 'fs_data' to 'g_user_fs_data': 
+            // because reassign a variable containing a references, will just creates a new reference!
+            for(let key in fs_data){
+                g_user_fs_data[key] = fs_data[key];
+            }
+            // now other functions using 'g_user_fs_data' will have the updated value.
 
             /*** 6 ***/
             display_welcomebanner_for_first_time_users(user, fs_data);
@@ -38,9 +67,8 @@ document.addEventListener("DOMContentLoaded", function(){
         });
         if(user){
             // user is signed in.
-
             /*** 7 ***/
-            add_new_books_to_firestore_database(user);    
+            add_new_books_to_firestore_database(user, g_user_fs_data);    
 
             /*** 8 ***/
             handling_DOMs_delete_and_edit_buttons(user);
@@ -203,7 +231,7 @@ function login_user_with_email(){
 
 
 /*** 3 ***/
-function logout_user(user){
+function logout_user(){
 
     function f_error_reset(logout_form){
         logout_form.querySelector(".c_error_text").innerHTML = "";
@@ -305,13 +333,14 @@ async function display_welcomebanner_for_first_time_users(user, fs_data){
 
 
 /*** 7 ***/
-function add_new_books_to_firestore_database(user){
+function add_new_books_to_firestore_database(user, g_user_fs_data){
 
     function f_error_reset(){
         add_form.querySelector(".c_error_text").innerHTML = "";
     }
 
     function f_on_success(){
+        console.log("Book successfully added to the firestore-database!");
         const text = add_form.querySelector(".c_successful_text");
         text.innerHTML = "Book Successfully Added.";
         window.setTimeout(() => text.innerHTML = "", 2500);
@@ -322,14 +351,19 @@ function add_new_books_to_firestore_database(user){
         // Asynchronous callback function.
         e.preventDefault();
         try{
+            // check if the 'g_user_fs_data' object is empty:
+            if(g_user_fs_data && Object.keys(g_user_fs_data).length === 0 && g_user_fs_data.constructor === Object){
+                throw new Error("Error: Missing user's data, can't add the new book!");
+            }
+            // creating the object to be uploaded to firestore:
             let obj = { 
                 fs_title: add_form["id_book-name"].value,
                 fs_rating: parseInt(add_form["id_slider"].value),
-                fs_owner_nick: "Placeholder",
+                fs_owner_nick: g_user_fs_data.fs_nickname,
                 fs_owner_id: user.uid,
                 fs_create_time: new firebase.firestore.Timestamp.fromDate(new Date())
             };
-            // adding the data to firestore-database:
+            // uploading the data to firestore-database:
             // if the collection does not exist, firestore will create it for us.
             const book_ref = await fb_store.collection("fs_books").add(obj);
         }
@@ -346,6 +380,7 @@ function add_new_books_to_firestore_database(user){
         // clearing form and error-text if any:
         f_error_reset();
         add_form.reset();
+        add_form.querySelector("#id_value").innerHTML = "5";
         // book successfully added to firestore-database:
         f_on_success();
     });
@@ -409,7 +444,7 @@ function display_content_from_firestore(user, doc_array){
             li.appendChild(f_create_span("edit", ["c_button"], "n_edit_button"));           
         }
         li.appendChild(document.createElement("br"));
-        li.appendChild(f_create_span(`Added by "${doc_data.fs_owner_id}"`, ["c_author"]));
+        li.appendChild(f_create_span(`Added by "${doc_data.fs_owner_nick}"`, ["c_author"]));
         return li;
     }
 
@@ -444,6 +479,6 @@ function display_content_for_unauthorized_users(){
     const h2_header = document.querySelector("main h2");
     const ul_list = document.querySelector("#id_book-list ul");
 
-    h2_header.innerHTML = "Login to add your books to the database!";
+    h2_header.innerHTML = "Login to view people's favorite books and add your to the database!";
     ul_list.innerHTML = "";
 }

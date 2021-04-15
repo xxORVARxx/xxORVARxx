@@ -92,6 +92,12 @@ h1, h2{
     text-align: center;
 }
 
+main{
+    padding: 2rem 0rem 0rem 0rem;
+}
+
+
+
 .c_wrapper{
     width: 90%;
     max-width: 96rem;
@@ -99,7 +105,6 @@ h1, h2{
     border-radius: 0.8rem;
     box-shadow: 0rem 0.1rem 0.6rem rgba(255, 255, 255, 0.2);
     box-sizing: border-box;
-    padding: 0rem 0rem 2rem;
     overflow: hidden;
     border: 0.1rem solid rgb(92, 92, 92)
 }
