@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
         /*** 5 ***/
         get_data_from_firestore_and_update_user_bio(user, function(fs_data){
-            // Asynchronous callback function.
+            // Callback function.
 
             // if user is logged out remove all data from 'g_user_fs_data':
             for(let key in g_user_fs_data){
@@ -71,7 +71,38 @@ document.addEventListener("DOMContentLoaded", function(){
             add_new_books_to_firestore_database(user, g_user_fs_data);    
 
             /*** 8 ***/
-            handling_DOMs_delete_and_edit_buttons(user);
+            handling_DOMs_events_and_state(user, g_user_fs_data, function(e, e_str){
+                // Callback function.
+
+                switch(e_str){
+                    case "editing":
+
+                        /*** 8.1 ***/
+                        on_event_editing(e, user, g_user_fs_data);
+
+                        break;
+                    case "edit":
+
+                        /*** 8.2 ***/
+                        on_event_edit(e, user, g_user_fs_data);
+
+                        break;
+                    case "delete":
+
+                        /*** 8.3 ***/
+                        on_event_delete(e);
+
+                        break;
+                    case "alphabetical":
+                    case "rating":
+                    case "author":
+
+                        /*** 8.4 ***/
+                        on_event_filter(e, user, g_user_fs_data, e_str);
+
+                        break;
+                }
+            });
 
             // getting data from firestore (the books), using a realtime-listener,
             // this means that every time the data changes on the firestore-database
@@ -118,7 +149,7 @@ document.addEventListener("DOMContentLoaded", function(){
 function signup_create_user_with_email(){
 
     function f_error_reset(signup_form){
-        signup_form.querySelector(".c_error_text").innerHTML = "";
+        signup_form.querySelector(".c_error-text").innerHTML = "";
     }
 
     function f_get_form_data(signup_form){
@@ -144,7 +175,9 @@ function signup_create_user_with_email(){
         const private_info = {
             fs_nickname: signup_obj.nickname,
             fs_email: signup_obj.email,
-            fs_first_time: true
+            fs_first_time: true,
+            fs_DOM_state_edit: "",
+            fs_DOM_state_filter: "time" 
         };
         // if the collection does not exist, firestore will create it for us.
         // make the user's firestore data have the same 'uid' as the user's auth 'uid',
@@ -172,7 +205,7 @@ function signup_create_user_with_email(){
         }
         catch(err){
             // handle errors here.
-            signup_form.querySelector(".c_error_text").innerHTML = err.message;
+            signup_form.querySelector(".c_error-text").innerHTML = err.message;
             console.error(err);
             return;
         }
@@ -190,7 +223,7 @@ function signup_create_user_with_email(){
 function login_user_with_email(){
 
     function f_error_reset(login_form){
-        login_form.querySelector(".c_error_text").innerHTML = "";
+        login_form.querySelector(".c_error-text").innerHTML = "";
     }
 
     async function f_update_user_info(the_credential){
@@ -216,7 +249,7 @@ function login_user_with_email(){
         } 
         catch(err){
             // handle errors here.
-            login_form.querySelector(".c_error_text").innerHTML = err.message;
+            login_form.querySelector(".c_error-text").innerHTML = err.message;
             console.error(err);
             return;
         }
@@ -234,7 +267,7 @@ function login_user_with_email(){
 function logout_user(){
 
     function f_error_reset(logout_form){
-        logout_form.querySelector(".c_error_text").innerHTML = "";
+        logout_form.querySelector(".c_error-text").innerHTML = "";
     }
 
     const logout_form = document.querySelector("#id_logout-form");
@@ -249,7 +282,7 @@ function logout_user(){
         }
         catch(err){
             // handle errors here.
-            logout_form.querySelector(".c_error_text").innerHTML = err.message;
+            logout_form.querySelector(".c_error-text").innerHTML = err.message;
             console.error(err);
             return;
         }
@@ -336,12 +369,12 @@ async function display_welcomebanner_for_first_time_users(user, fs_data){
 function add_new_books_to_firestore_database(user, g_user_fs_data){
 
     function f_error_reset(){
-        add_form.querySelector(".c_error_text").innerHTML = "";
+        add_form.querySelector(".c_error-text").innerHTML = "";
     }
 
     function f_on_success(){
         console.log("Book successfully added to the firestore-database!");
-        const text = add_form.querySelector(".c_successful_text");
+        const text = add_form.querySelector(".c_successful-text");
         text.innerHTML = "Book Successfully Added.";
         window.setTimeout(() => text.innerHTML = "", 2500);
     }
@@ -358,7 +391,7 @@ function add_new_books_to_firestore_database(user, g_user_fs_data){
             // creating the object to be uploaded to firestore:
             let obj = { 
                 fs_title: add_form["id_book-name"].value,
-                fs_rating: parseInt(add_form["id_slider"].value),
+                fs_rating: parseInt(add_form.querySelector(".c_slider").value),
                 fs_owner_nick: g_user_fs_data.fs_nickname,
                 fs_owner_id: user.uid,
                 fs_create_time: new firebase.firestore.Timestamp.fromDate(new Date())
@@ -373,14 +406,14 @@ function add_new_books_to_firestore_database(user, g_user_fs_data){
                         '"FirebaseError: Missing or insufficient permissions. ..." \n',
                         "check if your Cloud-Firestore security-rules are working!");
 
-            add_form.querySelector(".c_error_text").innerHTML = err.message;
+            add_form.querySelector(".c_error-text").innerHTML = err.message;
             console.error(err);
             return;
         }
         // clearing form and error-text if any:
         f_error_reset();
         add_form.reset();
-        add_form.querySelector("#id_value").innerHTML = "5";
+        add_form.querySelector(".c_slider-value").innerHTML = "5";
         // book successfully added to firestore-database:
         f_on_success();
     });
@@ -389,34 +422,156 @@ function add_new_books_to_firestore_database(user, g_user_fs_data){
 
 
 /*** 8 ***/
-function handling_DOMs_delete_and_edit_buttons(user){
+function handling_DOMs_events_and_state(user, g_user_fs_data, f_callback){
     const book_list = document.querySelector("#id_book-list ul");
-    book_list.addEventListener("click", async function(e){
+    book_list.addEventListener("click", function(e){
         // Asynchronous callback function in another thread.
-        if(e.target.className !== "c_button"){
-            return;
+        e.preventDefault();
+        if(Boolean(g_user_fs_data.fs_DOM_state_edit)){
+            f_callback(e, "editing");
         }
-        const li_tag = e.target.parentElement;
-        const book_id = li_tag.dataset.d_book_id;
-        try{
-            // seting-up the document we want to work with. It's in the 
-            // 'fs_books' collection and we have the ID of the document (book_id):
-            const fb_doc = fb_store.collection("fs_books").doc(book_id);
-            if(e.target.getAttribute("name") == "n_delete_button"){
-                // now we'll delete this document from the collection on the firestore database:
-                await fb_doc.delete();
-                console.log("Book successfully deleted from the firestore-database!");
-            }
-            else if(e.target.getAttribute("name")  == "n_edit_button"){
-    
-            }
-        }
-        catch(err){
-            // handle errors here.
-            console.error(err);
-            return;
+        const button = e.target.getAttribute("clickable");
+        if(button){
+            f_callback(e, button);
         }
     });
+}
+
+/*** 8.1 ***/
+async function on_event_editing(e, user, g_user_fs_data){
+
+    function f_on_save(){
+        console.log("Save the edit");
+    }
+
+    const edit_form = document.querySelector("#id_edit-book-form-copy");
+    const li_tag = edit_form.parentElement;
+    const span_tags = li_tag.children;
+    const button = e.target.getAttribute("clickable");
+    if(edit_form.contains(e.target) && button !== "cancel"){
+        if(button === "save"){
+            f_on_save();
+        }
+        else{
+            return;
+        }
+    }
+    edit_form.remove();
+    for(let i = 0; i < span_tags.length; i++){
+        span_tags[i].style.display = "";
+    }
+    try{
+        // seting-up the document we want to get. It's in the collection: 'fs_users' 
+        // and has the same document-ID as the user's 'uid':
+        const fb_doc = fb_store.collection("fs_users").doc(user.uid);
+        // now we will update the document's fild with the 'merge' option:
+        await fb_doc.set({ fs_DOM_state_edit: "" }, { merge: true });
+        g_user_fs_data.fs_DOM_state_edit = "";
+        console.log("Closed the edit-form");
+    }
+    catch(err){
+        // handle errors here.
+        console.error(err);
+        return;
+    }
+}
+
+/*** 8.2 ***/
+async function on_event_edit(e, user, g_user_fs_data){
+
+    function f_copy_the_edit_form(li_tag){
+
+        function f_slider(slider, reference_value, starting_value){
+            const input =  slider.querySelector("input");
+            const option = slider.querySelector("datalist option");
+            const span =   slider.querySelector("span");
+            input.value = starting_value;
+            option.innerHTML = reference_value;
+            span.innerHTML = `${starting_value}/10`;
+            input.oninput = function(){
+                span.innerHTML = `${this.value}/10`;
+            }
+        }
+
+        // get the template of the form and make a copy of it:
+        const template = document.querySelector('#id_edit-book-template');
+        const edit_form = template.content.firstElementChild.cloneNode(true);
+        // give the new copy of the edit form an id and some styles:
+        edit_form.setAttribute("id", "id_edit-book-form-copy");
+        edit_form.style.width = "95%";
+        // overwride the placeholder-value with the name of the book being edited:
+        edit_form.querySelector("#id_edit-name").value = li_tag.querySelector(".c_name").innerText;
+        // create the slider and set it to start at the 'rating' of the book being edited:
+        const rating = parseInt(li_tag.querySelector(".c_rating").innerText);
+        f_slider(edit_form.querySelector(".c_input-range"), rating, rating);
+        // move the copy into the book-list where the book being edited was:
+        li_tag.appendChild(edit_form);
+    }
+
+    /*
+    // VIRKAR EKKI HÉRNA ÞVÍ USER-DATA ER EKKI LOADAÐ NÚNA!!!!
+    const li_tag = document.querySelector(`#id_book-list ul li[data-d_book_id="${g_user_fs_data.fs_DOM_state_edit}"]`);
+    */
+    const li_tag = e.target.parentElement; // MÁ EKKI NOTA 'e' !!!
+    const span_tags = li_tag.children;
+    const book_id = li_tag.dataset.d_book_id;
+    for(let i = 0; i < span_tags.length; i++){
+        span_tags[i].style.display = "none";
+    }
+    f_copy_the_edit_form(li_tag);
+    try{
+        // seting-up the document we want to get. It's in the collection: 'fs_users' 
+        // and has the same document-ID as the user's 'uid':
+        const fb_doc = fb_store.collection("fs_users").doc(user.uid);
+        // now we will update the document's fild with the 'merge' option:
+        await fb_doc.set({ fs_DOM_state_edit: book_id }, { merge: true });
+        g_user_fs_data.fs_DOM_state_edit = book_id;
+        console.log(`Open edit-form for book with id: ${book_id}`);
+    }
+    catch(err){
+        // handle errors here.
+        console.error(err);
+        return;
+    }
+}
+
+/*** 8.3 ***/
+async function on_event_delete(e){
+    const li_tag = e.target.parentElement;
+    const book_id = li_tag.dataset.d_book_id;
+    try{
+        // seting-up the document we want to work with. It's in the 
+        // 'fs_books' collection and we have the ID of the document (book_id):
+        const fb_doc = fb_store.collection("fs_books").doc(book_id);
+        // now we'll delete this document from the collection on the firestore database:
+        await fb_doc.delete();
+        console.log("Book successfully deleted from the firestore-database!");
+    }
+    catch(err){
+        // handle errors here.
+        console.error(err);
+        return;
+    }
+}
+
+/*** 8.4 ***/
+async function on_event_filter(e, user, g_user_fs_data, filter){
+    const li_tag = e.target.parentElement;
+    const book_id = li_tag.dataset.d_book_id;
+    try{
+        // seting-up the document we want to get. It's in the collection: 'fs_users' 
+        // and has the same document-ID as the user's 'uid':
+        const fb_doc = fb_store.collection("fs_users").doc(user.uid);
+        // now we will update the document's fild with the 'merge' option:
+        await fb_doc.set({ fs_DOM_state_filter: filter }, { merge: true });
+        g_user_fs_data.fs_DOM_state_filter = filter;
+        console.log(`Filter is set to '${filter}'`);
+    }
+    catch(err){
+        // handle errors here.
+        console.error(err);
+        return;
+    }
 }
 
 
@@ -424,12 +579,12 @@ function handling_DOMs_delete_and_edit_buttons(user){
 /*** 9 ***/
 function display_content_from_firestore(user, doc_array){
 
-    function f_create_span(the_content, classes_array, the_name = null){
+    function f_create_span(the_content, classes_array, clickable = null){
         const span = document.createElement("span");
         span.textContent = the_content;
         classes_array.forEach(the_class => span.classList.add(the_class));
-        if(the_name){
-            span.setAttribute("name", the_name);
+        if(clickable){
+            span.setAttribute("clickable", clickable);
         }
         return span;
     }
@@ -437,14 +592,14 @@ function display_content_from_firestore(user, doc_array){
     function f_create_content(doc_data, book_id){
         const li = document.createElement("li");
         li.setAttribute("data-d_book_id", book_id);
-        li.appendChild(f_create_span(doc_data.fs_title, ["c_name", "c_prime_text"]));
-        li.appendChild(f_create_span(`${doc_data.fs_rating}/10`, ["c_rating"]));
+        li.appendChild(f_create_span(doc_data.fs_title, ["c_name", "c_prime-text"], "alphabetical"));
+        li.appendChild(f_create_span(`${doc_data.fs_rating}/10`, ["c_rating"], "rating"));
         if(user.uid === doc_data.fs_owner_id){
-            li.appendChild(f_create_span("delete", ["c_button"], "n_delete_button"));
-            li.appendChild(f_create_span("edit", ["c_button"], "n_edit_button"));           
+            li.appendChild(f_create_span("delete", ["c_button"], "delete"));
+            li.appendChild(f_create_span("edit", ["c_button"], "edit"));           
         }
         li.appendChild(document.createElement("br"));
-        li.appendChild(f_create_span(`Added by "${doc_data.fs_owner_nick}"`, ["c_author"]));
+        li.appendChild(f_create_span(`Added by "${doc_data.fs_owner_nick}"`, ["c_author"], "author"));
         return li;
     }
 

@@ -39,7 +39,7 @@
                         <input type="text" id="id_signup-nickname" required />
                     </div>
                     <button>Sign up</button>
-                    <h2 class="c_error_text"></h2>
+                    <h2 class="c_error-text"></h2>
                 </form>
 
                 <!--LOGIN MODAL-->
@@ -54,14 +54,14 @@
                         <input type="password" id="id_login-password" required />
                     </div>
                     <button>Login</button>
-                    <h2 class="c_error_text"></h2>
+                    <h2 class="c_error-text"></h2>
                 </form>
 
                 <!--LOGOUT MODAL-->
                 <form class="c_modal c_auth-logged-in" id="id_logout-form" style="display: none;">
                     <h2>Logout</h2>
                     <button>Logout</button>
-                    <h2 class="c_error_text"></h2>
+                    <h2 class="c_error-text"></h2>
                 </form>
 
             </div>
@@ -83,15 +83,35 @@
                     <li data-d_book_id="1234567890abcdeABCDE">
                         <span class="c_name">The Master and the Margarita</span>
                         <span class="c_rating">6/10</span>
-                        <span class="c_button" name="n_delete_button">delete</span>
-                        <span class="c_button" name="n_edit_button">edit</span>
+                        <span class="c_button" clickable="delete">delete</span>
+                        <span class="c_button" clickable="edit">edit</span>
                         <br>
                         <span class="c_author">user.uid</span>
                     </li>
                     -->
                 </ul>
             </div>
-    
+            
+            <!--EDIT BOOK MODAL-->
+            <template id="id_edit-book-template">
+                <form class="c_modal">
+                    <h2>Edit Book</h2>
+                    <div class="c_input-field">
+                        <label for="id_edit-name">Edit Name</label>
+                        <input type="text" id="id_edit-name" value="placeholder" required />
+                    </div>
+                    <div class="c_input-range">
+                        <input type="range" class="c_slider" min="0" max="10" value="5" list="id_reference-mark">
+                        <datalist id="id_reference-mark">
+                            <option>5</option>
+                        </datalist>
+                        <span>5/10</span>
+                    </div>
+                    <button clickable="save">Save</button>
+                    <button clickable="cancel">Cancel</button>
+                </form>
+            </template>
+
             <!--ADD BOOK MODAL-->
             <form class="c_modal c_auth-logged-in" id="id_add-book-form" style="display: none;">
                 <h2>Add Book</h2>
@@ -100,20 +120,21 @@
                     <input type="text" id="id_book-name" required />
                 </div>
                 <div class="c_input-range">
-                    <input type="range" id="id_slider" min="0" max="10" value="5">
-                    <span id="id_value"></span>
-                    <span>/10</span>
+                    <input type="range" class="c_slider" min="0" max="10" value="5">
+                    <span class="c_slider-value"></span>
                 </div>
                 <button>Add Book</button>
-                <h2 class="c_error_text"></h2>
-                <h2 class="c_successful_text"></h2>
+                <h2 class="c_error-text"></h2>
+                <h2 class="c_successful-text"></h2>
                 <script>// JavaScript for the <input> range slider:
-                    const the_slider = document.getElementById("id_slider");
-                    const output_value = document.getElementById("id_value");
-                    output_value.innerHTML = the_slider.value;
-                    the_slider.oninput = function(){
-                        output_value.innerHTML = this.value;
-                    }
+                    (function(){
+                        const the_slider = document.querySelector("#id_add-book-form .c_slider");
+                        const output_value = document.querySelector("#id_add-book-form .c_slider-value");
+                        output_value.innerHTML = `${the_slider.value}/10`;
+                        the_slider.oninput = function(){
+                            output_value.innerHTML = `${this.value}/10`;
+                        }
+                    })()
                 </script>
             </form>
         </main>

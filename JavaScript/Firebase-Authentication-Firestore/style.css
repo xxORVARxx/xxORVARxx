@@ -242,19 +242,19 @@ main{
 
 
 
-.c_error_text{
+.c_error-text{
     color: palevioletred;
     font-weight: bold;
     margin: 3rem 0rem;
 }
 
-.c_successful_text{
+.c_successful-text{
     color: springgreen;
     font-weight: bold;
     margin: 3rem 0rem;
 }
 
-.c_prime_text{
+.c_prime-text{
     font-weight: bolder;
     font-size: 1.3rem;
     text-shadow: 0rem 0rem 0.5rem var(--my-theme-prime-color);
