@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+
+<!--Author: Temani Afif on Nov 22, 2021-->
+<!--Source: https://css-tricks.com/responsive-layouts-fewer-media-queries/-->
+<!--Topic:  Responsive Layouts, Fewer Media Queries.-->
+
+<!--CSS has evolved to the points that there are a lot of tricks that can help us drastically reduce the usage of media queries. 
+    Here is how to replace multiple media queries with only one CSS declaration. -->
+
+<html>
+    <head>
+        <!--Tell any browser that this file is UTF-8 encoded:-->
+        <meta charset="utf-8">
+        <!--Let browser know website is optimized for mobile:-->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!--Tell Microsoft Internet Explorer to use the latest rendering engine: (edge)-->
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Responsive Layouts, Fewer Media Queries.</title>
+        <!--Internal CSS style sheet:-->
+        <style>
+
+            /* 01 -- Control the number of items per row:*/
+            .container_01{
+                display: flex;
+                flex-wrap: wrap;/* this */
+                gap: 10px;
+            }
+            .container_01 > div{
+                height: 50px;
+                flex: max( 200px, 100% / 3 - 20px );
+                /*flex: max( 400px, 100%/4 + 0.1% ); /*<--Better version, see text below.*/
+                background: red;
+            }
+            /*Breaking this down:
+             > When the screen width increases, the width of our container also increases, meaning that 100%/3 gets bigger than 400px at some point.
+             > Since we are using the max() function as the width and are dividing 100% by 3 in it, the largest any single element can be is just one-third of the overall container width. So, we get a maximum of three elements per row.
+             > When the screen width is small, 400px takes the lead and we get our initial behavior.
+
+            You might also be asking: What the heck is that 20px value in the formula?
+
+            It’s twice the grid template’s gap value, which is 10px times two. When we have three items on a row, there are two gaps between elements (one on each on the left and right sides of the middle element), so for N items we should use max(400px, 100%/N - (N - 1) * gap). Yes, we need to account for the gap when defining the width, but don’t worry, we can still optimize the formula to remove it!
+
+            We can use max(400px, 100%/(N + 1) + 0.1%). The logic is: we tell the browser that each item has a width equal to 100%/(N + 1) so N + 1 items per row, but we add a tiny percentage ( 0.1%)—thus one of the items wraps and we end with only N items per row. Clever, right? No more worrying about the gap!*/
+
+
+
+            /* 02 -- Items grow, but do not shrink:*/
+            .container_02{
+                --w: 200px;
+                --n: 3;
+                display: grid;
+                grid-template-columns: repeat( auto-fit, 
+                    minmax( clamp( 100% / ( var(--n) + 1 ) + 0.1%, var(--w), 100% ), 1fr )
+                );
+                gap: 10px;
+            }
+            .container_02 > div{
+                height: 50px;
+                background: blue;
+            }
+            /*We noted earlier that using the grid method could lead to overflow if the base width is bigger than the container width. To overcome this we change:
+                max(400px, 100%/(N + 1) + 0.1%)
+            …to:
+                clamp(100%/(N + 1) + 0.1%, 400px, 100%)
+            Breaking this down:
+             > When the screen width is big, 400px is clamped to 100%/(N + 1) + 0.1%, maintaining our control of the maximum number of items per row.
+             > When the screen width is small, 400px is clamped to 100% so our items never exceed the container width.
+            
+            */
+
+
+
+            /* 03 -- Control when the items wrap:*/
+            .container_03{
+                --w: 300px;
+                --n: 3;
+                display: grid;
+                grid-template-columns: repeat( auto-fit, 
+                    minmax( clamp( 100% / (var(--n) + 1 ) + 0.1%, ( var(--w) - 100vw ) * 1000, 100%), 1fr )
+                );
+                gap: 10px;
+            }
+            .container_03 > div{
+                height: 50px;
+                background: green;
+            }
+            /*So far, we’ve had no control over when elements wrap from one line to another. We don’t really know when it happens because it depends a number of things, like the base width, the gap, the container width, etc. To control this, we are going to change our last clamp() formula, from this:
+                clamp(100%/(N + 1) + 0.1%, 400px, 100%)
+            …to:
+                clamp(100%/(N + 1) + 0.1%, (400px - 100vw)*1000, 100%)
+            I can hear you screaming about that crazy-looking math, but bear with me. It’s easier than you might think. Here’s what’s happening:    
+             
+             > When the screen width (100vw) is greater than 400px, (400px - 100vw) results in a negative value, and it gets clamped down to 100%/(N + 1) + 0.1%, which is a positive value. This gives us N items per row.
+             > When the screen width (100vw) is less than 400px, (400px - 100vw) is a positive value and multiplied by a big value that’s clamped to the 100%. This results in one full-width element per row.
+
+            Hey, we made our first media query without a real media query! We are updating the number of items per row from N to 1 thanks to our clamp() formula. It should be noted that 400px behave as a breakpoint in this case.*/
+
+
+
+            /* 04 -- From N items per row to M items per row:*/
+            .container_04{
+                --w: 400px;
+                --N: 4;
+                --M: 2;
+                display: grid;
+                grid-template-columns: repeat( auto-fit, 
+                    minmax( 
+                        clamp( 
+                            100% / (var(--N) + 1 ) + 0.1%, (var(--w) - 100vw ) * 1000, 
+                            100% / (var(--M) + 1 ) + 0.1% ), 
+                    1fr )
+                );
+                gap: 10px;
+            }
+            .container_04 > div{
+                height: 50px;
+                background: yellow;
+            }
+            /*We can totally do that by updating our container’s clamped width:
+                clamp(100%/(N + 1) + 0.1%, (400px - 100vw)*1000, 100%/(M + 1) + 0.1%)
+            I think you probably get the trick by now. When the screen width is bigger than 400px we fall into the first rule (N items per row). When the screen width is smaller than 400px, we fall into the second rule (M items per row).
+
+            We can now control the number of items per row and when that number should change—using only CSS custom properties and one CSS declaration.
+            */
+
+
+
+            /* 05 -- From N items per row to M items per row, down to 1 item pre row:*/
+            .container_05{
+                --w1: 500px;
+                --w2: 300px;
+                --N: 4;
+                --M: 2;
+                display: grid;
+                grid-template-columns: repeat( auto-fit, 
+                    minmax( 
+                        clamp( 
+                            clamp( 
+                                100% / (var(--N) + 1 ) + 0.1%, (var(--w1) - 100vw ) * 1000, 
+                                100% / (var(--M) + 1 ) + 0.1% ), (var(--w2) - 100vw ) * 1000, 100% ), 
+                    1fr )
+                );
+                gap: 10px;
+            }
+            .container_05 > div{
+                height: 50px;
+                background: palevioletred;
+            }
+            /*Our formula becomes:
+                clamp(clamp(100%/(N + 1) + 0.1%, (W1 - 100vw)*1000,100%/(M + 1) + 0.1%), (W2 - 100vw)*1000, 100%)
+            A clamp() within a clamp()? Yes, it starts to get a big lengthy and confusing but still easy to understand. Notice the W1 and W2 variables in there. Since we are changing the number of items per rows between three values, we need two “breakpoints” (from N to M, and from M to 1).
+
+            Here’s what’s happening:
+            > When the screen width is smaller than W2, we clamp to 100%, or one item per row.
+            > When the screen width is larger than W2, we clamp to the first clamp().
+            > In that first clamp, when the screen width is smaller than W1, we clamp to 100%/(M + 1) + 0.1%), or M items per row.
+            > In that first clamp, when the screen width is bigger than W1, we clamp to 100%/(N + 1) + 0.1%), or N items per row.
+
+            We made two media queries using only one CSS declaration! Not only this, but we can adjust that declaration thanks to the CSS custom properties, which means we can have different breakpoints and a different number of columns for different containers.
+            */
+
+
+
+            /* 06 -- From N columns to M columns to P columns to 1 column:*/
+            .container_06{
+                --w1: 650px;
+                --w2: 500px;
+                --w3: 350px;
+                --N: 6;
+                --M: 4;
+                --P: 2;
+                display: grid;
+                grid-template-columns: repeat( auto-fit, 
+                    minmax( 
+                        clamp( 
+                            clamp( 
+                                clamp( 
+                                    100% / (var(--N) + 1 ) + 0.1%, (var(--w1) - 100vw ) * 1000,
+                                    100% / (var(--M) + 1 ) + 0.1% ), (var(--w2) - 100vw ) * 1000, 
+                                    100% / (var(--P) + 1 ) + 0.1% ), (var(--w3) - 100vw ) * 1000, 
+                                    100% ), 
+                    1fr )
+                );
+                gap: 10px;
+            }
+            .container_06 > div{
+                height: 50px;
+                background: darkslateblue;
+            }
+            /*We can have even more by nesting another clamp() to get from N columns to M columns to P columns to one column.
+
+            |            W3           W2           W1
+            |------------|------------|------------|------------- - - > Screen Width
+            |  1-column     P-column     M-column     N-column
+
+            we have a responsive layout without any single media queries while using just one CSS declaration—sure, it’s a lengthy declaration, but still counts as one.
+            */
+
+
+
+            /* 07 -- Container Queries:*/
+            .container_07{
+                 /*First breakpoint:*/
+                --w1: 600px;
+                --N: 4;
+                /*Second breakpoint:*/
+                --w2: 450px;
+                --M: 3;
+                display: grid;
+                grid-template-columns: repeat( auto-fit, 
+                    minmax( 
+                        clamp( 
+                            clamp( 
+                                100% / (var(--N) + 1 ) + 0.1%, (var(--w1) - 100% ) * 1000, 
+                                100% / (var(--M) + 1 ) + 0.1% ), (var(--w2) - 100% ) * 1000, 100% ), 
+                    1fr )
+                );
+                gap: 10px;
+                border: 2px solid;
+            }
+            .container_07 > div{
+                height: 50px;
+                background: orange;
+            }
+            .extra_07{
+                /*First breakpoint:*/
+                --w1: 500px;
+                --N: 3;
+                /*Second breakpoint:*/
+                --w2: 350px;
+                --M: 2;
+                padding:50px;
+                overflow: hidden;
+                margin: 5px 5px 5px 20vw;
+                resize: horizontal;
+                background: lightslategray;
+            }
+            .extra_07 > div{
+                background: darkgreen;
+            }
+            /*Let’s simulate container queries!
+            Everyone is excited about container queries! What makes them neat is they consider the width of the element instead of the viewport/screen. The idea is that an element can adapt based on the width of its parent container for more fine-grain control over how elements respond to different contexts.
+
+            Container queries aren’t officially supported anywhere at the time of this writing, but we can certainly mimic them with our strategy. If we change 100vw with 100% throughout the code, things are based on the .container element’s width instead of the viewport width. As simple as that!
+
+            The number of columns change based on the container width which means we are simulating container queries! We’re basically doing that just by changing viewport units for a relative percentage value.
+            */
+
+
+
+            /* More tricks!*/
+
+
+
+            /* 08 -- Conditional background color:*/
+            .box_8{
+                height: 50px;
+                margin: 10px;
+                background: linear-gradient( green, green ) 0 / max( 0px, 100px - 100% ) 1px, red;
+                /*Using "linear-gradient(green,green) instead of linear-gradient(green 0 0) for better browser support."*/
+            }
+            /*We made a condition based on the width of the element compared to 100px!
+            > We have a linear gradient layer with a width equal to max(0px,100px - 100%) and a height equal to 1px. The height doesn’t really matter since the gradient repeats by default. Plus, it’s a one color gradient, so any height will do the job.
+            > 100% refers to the element’s width. If 100% computes to a value bigger than 100px, the max() gives us 0px, which means that the gradient does not show, but the comma-separated red background does.
+            > If 100% computes to a value smaller than 100px, the gradient does show and we get a green background instead.
+            */
+
+            /*Resizable div:*/
+            .resizable_box_8{
+                height: 50px;
+                margin: 10px;
+                overflow: hidden;
+                resize: horizontal;
+                background:
+                    linear-gradient(purple,purple) 0 / max( 0px, 200px - 100% ) 1px,
+                    linear-gradient(blue,blue)     0 / max( 0px, 350px - 100% ) 1px,
+                    linear-gradient(green,green)   0 / max( 0px, 600px - 100% ) 1px, red;
+            }
+            /*The same logic can be based on an element’s height instead by rearranging where that 1px value goes: 
+                1px max(0px,100px - 100%)
+            We can also consider the screen dimension by using vh or vw instead of %. We can even have more than two colors by adding more gradient layers.
+
+            |           200px        350px        600px
+            |------------|------------|------------|--------- - - > Screen Width
+            |   Purple        Blue         Green        Red
+
+            It should be noted that this method is not equivalent to the toggle of the display value. It’s more of a trick to give the element 0×0 dimensions, making it invisible. It may not be suitable for all cases, so use it with caution! It’s more a trick to be used with decorative elements where we won’t have accessibility issues.
+            It’s important to note that I am using 0px and not 0 inside max(). The latter makes invalidates property.
+            */
+
+
+
+            /* 09 -- Toggling an element’s visibility:*/
+            .box_09{
+                height: 50px;
+                background: red;
+                margin: 10px;
+            }
+            .inline_09{
+                display: inline-block;
+                width: 100px;
+            }
+            .green_09{
+                background: green;
+                max-width: clamp( 0px, ( 100vw - 500px ) * 1000, 100% );
+                max-height: clamp( 0px, ( 100vw - 500px ) * 1000, 1000px );
+                margin: clamp( 0px, ( 100vw - 500px ) * 1000, 10px );
+                overflow: hidden;
+            }
+            /*Show/hide an element based on the screen size. Notice how the green elements disappear on small screens.
+            Based on the screen width (100vw), we either get clamped to a 0px value for the max-height and max-width (meaning the element is hidden) or get clamped to 100% (meaning the element is visible and never greater than full width). We’re avoiding using a percentage for the max-height since it fails. That’s why we’re using a big pixel value (1000px).
+
+            It should be noted that this method is not equivalent to the toggle of the display value. It’s more of a trick to give the element 0×0 dimensions, making it invisible. It may not be suitable for all cases, so use it with caution! It’s more a trick to be used with decorative elements where we won’t have accessibility issues.
+            It’s important to note that I am using 0px and not 0 inside clamp(). The latter makes invalidates property.
+            */
+
+
+
+            /* 10 -- Changing the position of an element:*/
+            .container_10{
+                position: relative;
+                height: 250px;
+                width: 100%;
+            }
+            .box_10{
+                position: absolute;
+                height: 100px;
+                width: 100px;
+                border: 2px solid;
+                background: gold;
+                --c: ( 100vw - 700px ); /*<- we define our condition.*/
+                top: clamp( 10%, var(--c) * -1000, 50% );
+                left: clamp( 0px, var(--c) * 1000, 40% );
+            }
+            /*
+            The following trick is useful when we deal with a fixed or absolutely positioned element. The difference here is that we need to update the position based on the screen width. Like the previous trick, we still rely on clamp() and a formula that looks like this: clamp(X1,(100vw - W)*1000, X2).
+            
+            Basically, we are going to switch between the X1 and X2 values based on the difference, 100vw - W, where W is the width that simulates our breakpoint.
+
+            Let’s take an example. We want a div placed on the left edge (top: 50%; left:0) when the screen size is smaller than 700px, and place it somewhere else (say top: 10%; left: 40%) otherwise.
+
+            First, I have defined the condition with a CSS custom property to avoid the repetition. Note that I also used it with the background color switching trick we saw earlier—we can either use (100vw - 700px) or (700px - 100vw), but pay attention to the calculation later as both don’t have the same sign.
+            Then, within each clamp(), we always start with the smallest value for each property. Don’t incorrectly assume that we need to put the small screen value first!
+
+            Finally, we define the sign for each condition. I picked (100vw - 700px), which means that this value will be negative when the screen width is smaller than 700px, and positive when the screen width is bigger than 700px. If I need the smallest value of clamp() to be considered below 700px then I do nothing to the sign of the condition (I keep it positive) but if I need the smallest value to be considered above 700px I need to invert the sign of the condition. That’s why you see (100vw - 700px)*-1000 with the top property.
+
+            OK, I get it. This isn’t the more straightforward concept, so let’s do the opposite reasoning and trace our steps to get a better idea of what we’re doing.
+            For top, we have clamp(10%,(100vw - 700px)*-1000,50%) so…
+
+            > If the screen width (100vw) is smaller than 700px, then the difference (100vw - 700px) is a negative value. We multiply it with another big negative value (-1000 in this case) to get a big positive value that gets clamped to 50%: That means we’re left with top: 50% when the screen size is smaller than 700px.
+            > if the screen width (100vw) is bigger than 700px, we end with: top: 10% instead.
+
+            The same logic applies to what we’re declaring on the left property. The only difference is that we multiply with 1000 instead of -1000 .
+            It should be noted that a trick like this works with any property that accepts length values (padding, margin, border-width, translate, etc.). We are not limited to changing the position, but other properties as well.
+            */
+
+
+
+            /*More  examples.*/
+
+
+
+            /* 11 -- Progress bar:*/
+            progress[value]{
+                --w11: 200px;
+                --b: linear-gradient( red, red ) 0 / max( 0px, var(--w11) * 0.3 - 100% ) 1px, linear-gradient( orange, orange ) 0 / max( 0px, var(--w11) * 0.6 - 100% ) 1px, green;
+                appearance: none;
+                border: none;
+                width: var(--w11); 
+                height: 20px;
+                display: block;
+                margin: 10px;
+                background-color: lightgrey;
+                border-radius: 50px;
+            }
+            progress[value]::-webkit-progress-bar {
+                background-color: lightgrey;
+                border-radius: 50px;
+            }
+            progress[value]::-webkit-progress-value {
+                border-radius: 50px;
+                background: var(--b);
+            }
+            progress[value]::-moz-progress-bar {
+                border-radius: 50px;
+                background: var(--b);
+            }
+            /*The background color changing trick makes for a great progress bar or any similar element where we need to show a different color based on progression.
+            That demo is a pretty simple example where I define three ranges:
+            > Red: [0% 30%].
+            > Orange: [30% 60%].
+            > Green: [60% 100%].
+            There’s no wild CSS or JavaScript to update the color. A “magic” background property allows us to have a dynamic color that changes based on computed values.
+            This demo supports Chrome, Edge, and Firefox at the time of writing.
+            */
+
+
+
+            /* 12 -- Editable text content:*/
+            .text_12[contenteditable]{
+                width: 200px;
+                border: 1px solid;
+                font-size: 25px;
+                line-height: 1.2em;
+                background:
+                    linear-gradient( red, red)       0 0/1px max( 0px, 100% - 5 * 1.2em ), /*<- line 5 is red.*/
+                    linear-gradient( yellow, yellow) 0 0/1px max( 0px, 100% - 3.5 * 1.2em ); /*<- line 3 is white, line 4 yellow.*/
+            }
+            /*It’s common to give users a way to edit content. We can update color based on what’s entered.
+            We get a yellow “warning” when entering more than three lines of text, and a red “warning” if we go above 5 lines.
+            This demo supports Chrome, Edge, and Firefox at the time of writing.
+            */
+
+
+
+            /* 13 -- Fixed button:*/
+            .contact_13{
+                --w: 600px;
+                --c: (100vw - var(--w));
+                position: fixed;
+                cursor: pointer;
+                border: none;
+                background: #000;
+                color: #fff;
+                padding: clamp( 10px, var(--c) * -1000, 20px ) 20px;
+                font-size: clamp( 0px, var(--c) * 1000, 30px);
+                border-radius:
+                    clamp(10px, var(--c) * -1000, 100px )
+                    clamp(10px, var(--c) * -1000, 100px )
+                    clamp( 0px, var(--c) * -1000, 100px )
+                    clamp( 0px, var(--c) * -1000, 100px );
+                font-family: sans-serif;
+                transform-origin: bottom right;
+                bottom: clamp( 100px, var(--c) * 1000, 50% );
+                right: clamp( 0px, var(--c) * -1000, 20px );
+                transform: rotate(-90deg) translateX( clamp( 50%, var(--c) * -1000, 100% ));
+            }
+            .contact_13:before{
+                content: '\f075'; 
+                font-family: "Font Awesome 5 Free";
+                display: inline-block;
+                font-style: normal;
+                font-size: clamp( 0px, var(--c) * -1000, 30px );
+                font-weight: 900;
+                transform: rotate( 90deg );
+            }
+            /*You know those buttons that are sometimes fixed to the left or right edge of the screen, usually for used to link up a contact for or survey? We can have one of those on large screens, then transform it into a persistent circular button fixed to the bottom-right corner on small screens for more convenient taps.
+            */
+
+
+
+            /* 14 -- Fixed alert:*/
+            .banner_14{
+                --w: 700px;
+                --c: (100vw - var(--w));
+                color: #fff;
+                background: darkblue;
+                padding: 10px;
+                box-sizing: border-box;
+                text-align: center;
+                position: fixed;
+                bottom: clamp( 0px, var(--c) * 1000, calc( 100% - 10px ));
+                transform: translateY( clamp( 0%, var(--c) * 1000, 100% ));
+                right: clamp( 0px, var(--c) * 1000, 10px );
+                width: clamp( 300px, var(--c) * -1000, 100% );
+            }
+            .banner_14 p{
+                margin: 0;
+                display: inline-block;
+                text-align: left;
+            }
+            .banner_14 button{
+                border: none;
+                cursor: pointer;
+                background: #fff;
+                color: #000;
+                margin: 10px 5px 0 0;
+                font-size: clamp( 15px, var(--c) * 1000, 20px );
+                padding: 5px 20px;
+            }
+            /*Something that could work for those GDPR cookie notices.
+            */
+
+
+
+            /* 15 -- Responsive card:*/
+            .container_15{
+                width: auto;
+                padding: 50px;
+                background: pink;
+            }
+            .user_15{
+                --w: 850px;
+                --c: (100vw - var(--w));
+                position: relative;
+                max-width: 500px;
+                background: #fff;
+                margin: 10px auto;
+                border-radius: 10px;
+                overflow: hidden;
+                padding: 0 20px 0 clamp( 20px, var(--c) * 1000, 180px );
+                box-sizing: border-box;
+                box-shadow: 1px 2px 5px #0005;
+            }
+            .user_15 img{
+                position:absolute;
+                top: clamp( 0px, var(--c) * -1000, 10px );
+                left: clamp( 0px, var(--c) * -1000, 20px );
+                width: clamp( 50px, var(--c) * 1000, 150px );
+                height: clamp( 50px, var(--c) * 1000, 100% );
+                border-radius: clamp( 0px, var(--c) * -1000, 50px );
+                object-fit: cover;
+                object-position: top;
+            }
+            .user_15 h2{
+                margin: 20px 0 10px clamp( 0px, var(--c) * -1000, 70px );
+            }
+            /*Here’s a responsive card approach where CSS properties update based on the viewport size. Normally, we might expect the layout to transition from two columns on large screens to one column on small screens, where the card image is stacked either above or below the content. In this example, however, we change the position, width, height, padding, and border radius of the image to get a totally different layout where the image sits beside the card title.
+            */
+
+
+
+            /* 16 -- Speech bubbles:*/
+            .testimonial_16{
+                --w: 750px;
+                --c: calc( 100vw - var(--w));
+                max-width: 500px;
+                margin: 20px auto clamp( 20px, var(--c) * -1000, 120px );
+                position: relative;
+                padding-right: clamp( 0px, var(--c) * 1000, 140px );
+            }
+            .testimonial_16 p{
+                padding: 10px;
+                background: #37b1d9;
+                border-radius: 15px;
+                margin: 0;
+                font-size: 20px;
+            }
+            .testimonial_16 img{
+                position: absolute;
+                width: clamp( 60px, var(--c) * 1000, 100px );
+                border-radius: 50%;
+                right: clamp( 0px, var(--c) * -1000, 40px );
+                top: clamp( 0%, var(--c) * -1000, calc( 100% + 15px ));
+            }
+            .testimonial_16 h4{
+                position: absolute;
+                top: clamp( 110px, var(--c) * -1000, calc( 100% + 35px ));
+                right: clamp( 50px, var(--c) * -1000, 110px );
+                transform: translate( clamp( 0px, var(--c) * 1000, 50% ));
+                margin: 0;
+            }
+            .testimonial_16:before{
+                content: "";
+                position: absolute;
+                top: clamp( 50px, var(--c) * -1000, calc( 100% - 18px ));
+                right: clamp( 0px, var(--c) * 1000, 110px );
+                width: 40px;
+                height: 40px;
+                background: #37b1d9;
+                clip-path: polygon( 20% 0, 100% 0%, 0 100% );
+            }
+
+
+
+            /* 17 -- Timeline layout:*/
+            .timeline_17{
+                --w: 600px; /*<- the break point.*/
+                list-style: none;
+                max-width: 900px;
+                margin: 0 auto;
+                padding: 0;
+                display: grid;
+                grid-template-columns: repeat( auto-fit, minmax( clamp( 100% / 3 + 0.1%, (var(--w) - 100vw) * 1000, 100% ), 1fr ));
+                grid-gap: 20px 45px;
+                position: relative;
+            }
+            .timeline_17:before{
+                content: "";
+                position: absolute;
+                inset: 0 calc( 50% - 1px ) 0;
+                background: repeating-linear-gradient( #0000 0 6px, #000 0 12px );
+            }
+            .timeline_17 li{
+                border-radius: 15px;
+                padding: 10px;
+                background: #37b1d9;
+                color: #fff;
+                position: relative;
+            }
+            .timeline_17 li *{
+                margin: 0;
+            }
+            .timeline_17 li h4{
+                font-size: 23px;
+                margin-bottom: 5px;
+            }
+            .timeline_17 li:before{
+                content: "";
+                position: absolute;
+                top: 25px;
+                left: 100%;
+                width: 10px;
+                height: 15px;
+                background: inherit;
+                clip-path: polygon( 0 0, 100% 50%, 0 100% );
+            }
+            .timeline_17 li:after{
+                content: "";
+                position: absolute;
+                border-radius: 50%;
+                top: 27px;
+                width: 11px;
+                height: 11px;
+                left: calc( 100% + 17px );
+                background: #000;
+            }
+            .timeline_17 li:nth-child(even):before{
+                right: 100%;
+                left: auto;
+                bottom: 25px;
+                top: auto;
+                transform: scaleX( -1 );
+            }
+            .timeline_17 li:nth-child(even):after{
+                bottom: 27px;
+                top: auto;
+                right: calc( 100% + 17px );
+                left: auto;
+            }
+            .container_17 *:before, .container_17 *:after{
+                max-width: clamp( 0px, ( 100vw - var(--w)) * 1000, 100% );
+                max-height: clamp( 0px, ( 100vw - var(--w)) * 1000, 1000px );
+            }
+            .timeline_17 li:nth-child(4n + 1){
+                background: #37b1d9;
+            }
+            .timeline_17 li:nth-child(4n + 2){
+               background: #6cd937;
+            }
+            .timeline_17 li:nth-child(4n + 3){
+                background: linear-gradient( #6cd937, #6cd937) 0/max( 0px, 100vw - var(--w)) 1px, #37b1d9;
+            }
+            .timeline_17 li:nth-child(4n + 4){
+                background: linear-gradient( #37b1d9, #37b1d9) 0/max( 0px, 100vw - var(--w)) 1px, #6cd937;
+            }
+            /*Timelines are great patterns for visualizing key moments in time. This implementation uses three tricks to get one without any media queries. One trick is updating the number of columns, another is hiding some elements on small screens, and the last one is updating the background color. Again, no media queries!
+            */
+
+
+
+            /*Conclusion:
+
+            Media queries have been a core ingredient for responsive designs since the term responsive design was coined years ago. While they certainly aren’t going anywhere, we covered a bunch of newer CSS features and concepts that allow us to rely less often on media queries for creating responsive layouts.
+
+            We looked at flexbox and grid, clamp(), relative units, and combined them together to do all kinds of things, from changing the background of an element based on its container width, moving positions at certain screen sizes, and even mimicking as-of-yet-unreleased container queries. Exciting stuff! And all without one @media in the CSS.
+
+            The goal here is not to get rid or replace media queries but it’s more to optimize and reduce the amount of code especially that CSS has evolved a lot and now we have some powerful tool to create conditional styles. In other words, it’s awesome to see the CSS feature set grow in ways that make our lives as front-enders easier while granting us superpowers to control how our designs behave like we have never had before.
+            */
+        </style>
+    </head>
+    <main>
+
+        <!-- 01 -- Control the number of items per row:-->
+        <h1>-- 01 -- Control the number of items per row:</h1>
+        <div class="container_01">
+            <div>1</div>
+            <div>2</div>
+            <div>3</div>
+            <div>4</div>
+            <div>5</div>
+        </div>
+
+        <!-- 02 -- Items grow, but do not shrink:-->
+        <h1>-- 02 -- Items grow, but do not shrink:</h1>
+        <div class="container_02">
+            <div>1</div>
+            <div>2</div>
+            <div>3</div>
+            <div>4</div>
+            <div>5</div>
+        </div>
+
+        <!-- 03 -- Control when the items wrap:-->
+        <h1>-- 03 -- Control when the items wrap: (at 300px)</h1>
+        <div class="container_03">
+            <div>1</div>
+            <div>2</div>
+            <div>3</div>
+            <div>4</div>
+            <div>5</div>
+        </div>
+
+        <!-- 04 -- From N items per row to M items per row:-->
+        <h1>-- 04 -- From N items per row to M items per row: (at 400px)</h1>
+        <div class="container_04">
+            <div>1</div>
+            <div>2</div>
+            <div>3</div>
+            <div>4</div>
+            <div>5</div>
+        </div>
+
+        <!-- 05 -- From N items per row to M items per row, down to 1 item pre row:-->
+        <h1>-- 05 -- From N items per row to M items per row, down to 1 item pre row: (at 500px and 300px)</h1>
+        <div class="container_05">
+            <div>1</div>
+            <div>2</div>
+            <div>3</div>
+            <div>4</div>
+            <div>5</div>
+        </div>
+
+        <!-- 06 -- From N columns to M columns to P columns to 1 column-->
+        <h1>-- 06 -- From N columns to M columns to P columns to 1 column (at 650px, 500px, and 350px)</h1>
+        <div class="container_06">
+            <div>1</div>
+            <div>2</div>
+            <div>3</div>
+            <div>4</div>
+            <div>5</div>
+            <div>6</div>
+            <div>7</div>
+            <div>8</div>
+        </div>
+
+        <!-- 07 -- Container Queries:-->
+        <h1>-- 07 -- Container Queries: (using element’s width instead of the viewport width)</h1>
+        <div class="container_07">
+            <div>1</div>
+            <div>2</div>
+            <div>3</div>
+            <div>4</div>
+            <div>5</div>
+        </div>
+        <div class="container_07 extra_07">
+            <div>1</div>
+            <div>2</div>
+            <div>3</div>
+            <div>4</div>
+            <div>5</div>
+        </div>
+
+        <!--More tricks!-->
+        <h1>More tricks!</h1>
+
+        <!-- 08 -- Conditional background color:-->
+        <h1>-- 08 -- Conditional background color: (switch color at 100px)</h1>
+        <div class="box_8" style="width: 120px">120px</div>
+        <div class="box_8" style="width: 80px">80px</div>
+
+        <h2>Resizable div below: (200px, 350px, 600px)</h2>
+        <div class="resizable_box_8"></div>
+
+        <!-- 09 -- Toggling an element’s visibility:-->
+        <h1>09 -- Toggling an element’s visibility: (hide at 500px)</h1>
+        <div class="box_09"></div>
+        <div class="box_09 green_09"></div>
+        <div class="box_09"></div>
+        <div class="box_09 inline_09"></div>
+        <div class="box_09 inline_09 green_09"></div>
+        <div class="box_09 inline_09"></div>
+        <div class="box_09 inline_09 green_09"></div>
+        <div class="box_09 inline_09"></div>
+
+        <!-- 10 -- Changing the position of an element:-->
+        <h1>10 -- Changing the position of an element: (at 700px)</h1>
+        <div class="container_10">
+            <div class="box_10"></div>
+        </div>
+
+        <!--More  examples.-->
+        <h1>More  examples.</h1>
+
+        <!-- 11 -- Progress bar:-->
+        <h1>11 -- Progress bar:</h1>
+        <progress max="100" value="10">10%</progress>
+        <progress max="100" value="20">20%</progress>
+        <progress max="100" value="30">30%</progress>
+        <progress max="100" value="50">50%</progress>
+        <progress max="100" value="60">60%</progress>
+        <progress max="100" value="90">90%</progress>
+        <progress max="100" value="100">100%</progress>
+
+        <!-- 12 -- Editable text content:-->
+        <h1>12 -- Editable text content:</h1>
+        <div class="text_12" contenteditable=true> edit me </div>
+
+        <!-- 13 -- Fixed button:-->
+        <h1>13 -- Fixed button: (Black button to the left.)</h1>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
+        <button class="contact_13">Contact Us</button>
+
+        <!-- 14 -- Fixed alert:-->
+        <h1>14 -- Fixed alert: (Dark blue, upper-left-corner or bottom of page)</h1>
+        <div class="banner_14">
+            <p>14 -- Fixed alert: Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+            <button> Button 1</button>
+            <button> Button 2</button>
+        </div>
+
+        <!-- 15 -- Responsive card:-->
+        <div class="container_15">
+            <h1>15 -- Responsive card:</h1>
+            <div class="user_15">
+                <img src="https://picsum.photos/id/64/200/250" alt="user name">
+                <h2>Jane Doe</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed ante fringilla, rutrum turpis nec, sagittis massa. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque metus dui, cursus eu hendrerit eget, cursus sed tellus. Mauris congue vestibulum tristique. </p>
+            </div>
+        </div>
+
+        <!-- 16 -- Speech bubbles:-->
+        <h1>16 -- Speech bubbles:</h1>
+        <div class="testimonial_16">
+            <p>" Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet faucibus turpis ac accumsan. Integer aliquet semper massa quis commodo. Nam quis nibh vel ante imperdiet ornare a in lacus. Phasellus laoreet pretium diam ac semper  "</p>
+            <img src="https://randomuser.me/api/portraits/women/2.jpg" alt="Jane Doe">
+            <h4>Jane Doe</h4>
+        </div>
+        <div class="testimonial_16">
+            <p>" Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet faucibus turpis ac accumsan. Integer aliquet semper massa quis commodo. Nam quis nibh vel ante imperdiet ornare a in lacus. Phasellus laoreet pretium diam ac semper  "</p>
+            <img src="https://randomuser.me/api/portraits/men/14.jpg" alt="John Doe">
+            <h4>John Doe</h4>
+        </div>
+
+        <!-- 17 -- Timeline layout:-->
+        <div class="container_17">
+            <h1>17 -- Timeline layout:</h1>
+            <ul class="timeline_17">
+                <li>
+                    <h4>2021</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras vitae risus ut erat laoreet tempus. Curabitur vitae nunc fermentum lacus auctor tempus id non ante. Vestibulum eu lacus vestibulum,</p>
+                </li>
+                <li>
+                    <h4>2020</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras vitae risus ut erat laoreet tempus. </p>
+                </li>
+                <li>
+                    <h4>2019</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras vitae risus ut erat laoreet tempus. Curabitur vitae nunc fermentum lacus auctor tempus id non ante. Vestibulum eu lacus vestibulum, Curabitur vitae nunc fermentum lacus auctor tempus id non ante. Vestibulum eu lacus vestibulum,</p>
+                </li>
+                <li>
+                    <h4>2018</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras vitae risus ut erat laoreet tempus. Curabitur vitae nunc fermentum lacus auctor tempus id non ante. Vestibulum eu lacus vestibulum,</p>
+                </li>
+                <li>
+                    <h4>2017</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras vitae risus ut erat laoreet tempus. Curabitur vitae nunc fermentum lacus auctor tempus id non ante. Vestibulum eu lacus vestibulum,</p>
+                </li>
+                <li>
+                    <h4>2016</h4>
+                    <p>Curabitur vitae nunc fermentum lacus auctor tempus id non ante. Vestibulum eu lacus vestibulum,</p>
+                </li>
+                <li>
+                    <h4>2015</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras vitae risus ut erat laoreet tempus. Curabitur vitae nunc fermentum lacus auctor tempus id non ante. Vestibulum eu lacus vestibulum,</p>
+                </li>
+                <li>
+                    <h4>2014</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras vitae risus ut erat laoreet tempus. Curabitur vitae nunc fermentum lacus auctor tempus id non ante. Vestibulum eu lacus vestibulum, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras vitae risus ut erat laoreet tempus.</p>
+                </li>
+                <li>
+                    <h4>2013</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras vitae risus ut erat laoreet tempus. Curabitur vitae nunc fermentum lacus auctor tempus id non ante. Vestibulum eu lacus vestibulum,</p>
+                </li>
+            </ul>
+        </div>
+
+        <div style="height: 500px;"></div>
+    </main>
+</html>

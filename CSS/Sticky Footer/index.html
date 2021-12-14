@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+
+<!--Author: Chris Coyier on Nov 16, 2021 (Updated on Nov 17, 2021)-->
+<!--Source: https://css-tricks.com/a-clever-sticky-footer-technique/-->
+<!--Topic:  A Clever Sticky Footer Technique.-->
+
+<!--The idea is that they stick to the bottom of the screen, even when the content of the page isn’t enough to push them there. But if there is enough content, they are happily pushed down.
+It’s pretty much just this:
+
+html, body { height: 100%;}
+
+body > footer {
+  position: sticky;
+  top: 100vh;
+}
+What I like about it is that it doesn’t require any special extra wrapper for non-footer content.
+
+It’s also a little brain-bending. When I see top: 100vh; I think well that won’t work because it will push the footer outside the viewable area. But that’s the clever bit. It will do that no matter how big the footer is (no magic numbers), and then the sticky positioning will “suck it back up” to stick along the bottom edge. But it will never overlap content, so it’s happy to be pushed down below content, which is a core tenet of the sticky footer pattern.-->
+
+<html>
+    <head>
+        <!--Tell any browser that this file is UTF-8 encoded:-->
+        <meta charset="utf-8">
+        <!--Let browser know website is optimized for mobile:-->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!--Tell Microsoft Internet Explorer to use the latest rendering engine: (edge)-->
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>A Clever Sticky Footer Technique.</title>
+        <!--Internal CSS style sheet:-->
+        <style>
+            html, body { 
+                height: 100%;
+            }
+            body > footer {
+                position: sticky;
+                top: 100vh;
+            }
+            header, footer {
+                padding: 20px;
+                background-color: #eee;
+            }
+        </style>
+    </head>
+
+    <header>
+        Header
+    </header>
+    <main>
+        <h1>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatem vel cumque quis animi nisi, odit totam laborum quam molestias sed quidem, dolorum deleniti quae possimus obcaecati eaque praesentium alias! Aperiam.</h1>
+        <p>Blanditiis maxime odit expedita modi a itaque? Placeat expedita nam, aut ea odit dolores est optio ut odio pariatur! Similique pariatur perferendis quaerat sequi. Eligendi qui illo nesciunt voluptates facilis!</p>
+        <p>Reiciendis rem inventore asperiores sapiente cupiditate officia facilis earum accusantium deserunt, incidunt molestias! Fuga fugiat eveniet explicabo. Eveniet soluta voluptates saepe minima veniam illum error atque quibusdam, veritatis cupiditate culpa.</p>
+        <p>Voluptatum eligendi totam, beatae ut ea, minus aut voluptate atque eaque maiores officiis praesentium aperiam impedit consectetur vero quia at nostrum? Similique dolorem cupiditate quis veniam! Soluta assumenda voluptatum delectus.</p>
+    </main>
+    <footer>
+        Footer 
+        - <a id="add-content" href="" role="button">ADD CONTENT</a>
+        - <a id="remove-content" href="" role="button">REMOVE CONTENT</a>
+    </footer>
+</html>
