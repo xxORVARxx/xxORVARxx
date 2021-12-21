@@ -28,14 +28,15 @@ It’s also a little brain-bending. When I see top: 100vh; I think well that won
         <title>A Clever Sticky Footer Technique.</title>
         <!--Internal CSS style sheet:-->
         <style>
-            html, body { 
+            html, body{
+                margin: 0;
                 height: 100%;
             }
-            body > footer {
+            body > footer{
                 position: sticky;
                 top: 100vh;
             }
-            header, footer {
+            header, footer{
                 padding: 20px;
                 background-color: #eee;
             }
