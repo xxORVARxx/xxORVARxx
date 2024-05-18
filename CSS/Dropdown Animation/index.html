@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <!--Tell any browser that this file is UTF-8 encoded:-->
+        <meta charset="utf-8">
+        <!--Let browser know website is optimized for mobile:-->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!--Tell Microsoft Internet Explorer to use the latest rendering engine: (edge)-->
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>A Clever Sticky Footer Technique.</title>
+        <!--Import materialize.css from https://materializecss.com/-->
+        <link type="text/css" rel="stylesheet" href="materialize.css" media="screen,projection"/>
+        <!--Internal CSS style sheet:-->
+        <style>
+
+
+
+            /* 01 */
+            .big_01{
+                background: lightgreen;
+                margin: 10px;
+            }
+            .togel_01{
+                display: none;
+            }
+            .arrow_01{
+                background: black;
+                width: 100px;
+                height: 100px;
+                animation-name: rotate-90;
+                animation-duration: 0.5s;
+                animation-timing-function: ease;
+                animation-fill-mode: both;
+            }
+            .togel_01:checked + .arrow_01{
+                animation-name: rotate90;
+                animation-duration: 0.5s;
+                animation-timing-function: ease;
+                animation-fill-mode: both;
+            }
+
+
+
+            /* 02 */
+            .small_02{
+                background: lightpink;
+                display: inline-block;
+                margin: 10px;
+            }
+            .togel_02{
+                display: none;
+            }
+            .arrow_02{
+                background: black;
+                width: 100px;
+                height: 100px;
+                animation-name: rotate-90;
+                animation-duration: 0.5s;
+                animation-timing-function: ease;
+                animation-fill-mode: both;
+            }
+            .togel_02:checked + .arrow_02{
+                animation-name: rotate90;
+                animation-duration: 0.5s;
+                animation-timing-function: ease;
+                animation-fill-mode: both;
+            }
+
+
+
+            /* 03 */
+            .collapsible{
+                margin: 10px;
+            }
+            .arrow_03{
+                background: black;
+                width: 50px;
+                height: 50px;
+                margin: 10px 25px 10px 10px;
+                animation-name: rotate-90;
+                animation-duration: 0.5s;
+                animation-timing-function: ease;
+                animation-fill-mode: both;
+            }
+            li.active .arrow_03{
+                animation-name: rotate90;
+                animation-duration: 0.5s;
+                animation-timing-function: ease;
+                animation-fill-mode: both;
+            }
+
+
+
+
+            /* Animation: */
+            @keyframes rotate90{
+                0%{ clip-path: polygon(42% 8%, 50% 0, 92% 42%, 100% 50%, 50% 100%, 42% 92%, 85% 50%, 42% 8%); }
+                45%{ clip-path: polygon(42% 8%, 50% 0, 92% 42%, 100% 50%, 50% 100%, 42% 92%, 0 50%, 42% 8%); }
+                60%{ clip-path: polygon(8% 42%, 50% 0, 92% 42%, 100% 50%, 50% 100%, 42% 92%, 0 50%, 8% 42%); }
+                100%{ clip-path: polygon(8% 42%, 50% 85%, 92% 42%, 100% 50%, 50% 100%, 42% 92%, 0 50%, 8% 42%); }
+            }
+            @keyframes rotate-90{
+                0%{ clip-path: polygon(8% 42%, 50% 85%, 92% 42%, 100% 50%, 50% 100%, 42% 92%, 0 50%, 8% 42%); }    
+                40%{ clip-path: polygon(8% 42%, 50% 0, 92% 42%, 100% 50%, 50% 100%, 42% 92%, 0 50%, 8% 42%); }
+                60%{ clip-path: polygon(42% 8%, 50% 0, 92% 42%, 100% 50%, 50% 100%, 42% 92%, 0 50%, 42% 8%); }
+                100%{ clip-path: polygon(42% 8%, 50% 0, 92% 42%, 100% 50%, 50% 100%, 42% 92%, 85% 50%, 42% 8%); }
+            }
+        </style>
+    </head>
+    <body>
+
+
+        <!-- 01 -->
+        <div class="big_01">
+            <label>
+                <input type="checkbox" class="togel_01">
+                <div class="arrow_01"></div>
+            </label>
+        </div>
+
+        <!-- 02 -->
+        <div class="small_02">
+            <label>
+                <input type="checkbox" class="togel_02">
+                <div class="arrow_02"></div>
+            </label>
+        </div>
+
+
+
+        <!-- 03 -->
+        <ul class="collapsible popout" data-collapsible="accordion">
+            <li>
+                <div class="collapsible-header">
+                    <div class="arrow_03"></div>
+                    <h4>Vinnustaðamenning</h4>
+                </div>
+                <div class="collapsible-body"><p>
+                    Séu atvinnuveitendur í vandræðum með menningu vinnustaðarins, og þar af leiðandi starfsandann, er mikilvægt að bregðast við. Vinnustaðamenning hefur gríðarleg áhrif á upplifun starfsmanna á skipulagsheildinni og þannig á frammistöðu þeirra. Vitjun getur í þessum tilfellum aðstoðað stjórnendur í að skapa og viðhalda jákvæðri, skemmtilegri og hvetjandi vinnustaðamenningu með aðferðum mannauðsstjórnunar.</p>
+                </div>
+            </li>
+        </ul>
+
+
+
+        <!--JavaScript at end of body for optimized loading-->
+        <script type="text/javascript" src="materialize.js"></script>
+        <script type="text/javascript">
+            const options = {
+                accordion: false,
+            };
+            var elems = document.querySelectorAll('.collapsible');
+            var instances = M.Collapsible.init(elems, options);
+        </script>
+    </body>
+</html>

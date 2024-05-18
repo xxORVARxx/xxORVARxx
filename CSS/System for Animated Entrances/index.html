@@ -4,7 +4,8 @@
 <!--Source: https://css-tricks.com/a-handy-little-system-for-animated-entrances-in-css/-->
 <!--Topic:  A Handy Little System for Animated Entrances in CSS.-->
 <!--See also:  https://animate.style/  for a huge collection of CSS animations.-->
-<!--           https://cubic-bezier.com/-->
+<!--           https://cubic-bezier.com/
+               http://shouldiprefix.com/-->
 
 <!--We’ll go over the foundation I used to create the animations first, then get into the little flourishes I added, how to stagger animations, then how to apply them to HTML elements before we also take a look at how to do all of this while respecting a user’s reduced motion preferences.-->
 
@@ -158,11 +159,11 @@ This way, the animation never loads and elements enter into view like normal. It
             ========================================================================== */
             /* Initialize for Animation: */
             .animate{
-            animation-duration: 0.75s;
-            animation-delay: 0.5s;
-            animation-name: animate-fade;
-            animation-timing-function: cubic-bezier(.26, .53, .74, 1.48);
-            animation-fill-mode: backwards;
+                animation-duration: 0.75s;
+                animation-delay: 0.5s;
+                animation-name: animate-fade;
+                animation-timing-function: cubic-bezier(.26, .53, .74, 1.48);
+                animation-fill-mode: backwards;
             }
 
             /* Fade In: */

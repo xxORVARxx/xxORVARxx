@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!--Tell any browser that this file is UTF-8 encoded:-->
+        <meta charset="utf-8">
+        <!--Let browser know website is optimized for mobile:-->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!--Tell Microsoft Internet Explorer to use the latest rendering engine: (edge)-->
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Hover follow</title>
+        <!--Internal CSS style sheet:-->
+        <style>
+            @layer general-styling {
+                html {
+                    color-scheme: dark;
+                }
+                body {
+                    margin: 0;
+                    min-block-size: 100svh;
+                    display: grid;
+                }
+                .hover-box {
+                    display: grid;
+                    width: min(600px, 70%);
+                    margin: auto;
+                    aspect-ratio: 1;
+                    border: 3px solid hsl(200, 100%, 50%);
+                    border-radius: 0.5rem;
+                    box-shadow: 0 0 0.5rem hsl(200, 100%, 70%),
+                    inset 0 0 0.5rem hsl(200, 100%, 70%);
+                    overflow: hidden;
+                }
+                .hover-box::before {
+                    content: "";
+                    display: block;
+                    width: clamp(10px, 15%, 50px);
+                    aspect-ratio: 1;
+                    margin: auto;
+                    border-radius: 50%;
+                    background: hsl(340 60% 50%);
+                    box-shadow: 0 0 0.5rem hsl(340 60% 60%);
+                }
+            }
+
+            .hover-box::before {
+                animation: exit 500ms forwards;
+            }
+            .hover-box:hover::before {
+                animation: enter 500ms forwards;
+            }
+            @keyframes enter {
+                from { translate: 0 0; }
+                to { translate: var(--x) var(--y); }
+            }
+            @keyframes exit {
+                from { translate: var(--x) var(--y); }
+                to { translate: 0 0; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="hover-box"></div>
+
+        <script type="text/javascript"> "use strict";
+            const hoverBox = document.querySelector(".hover-box");
+
+            hoverBox.addEventListener("mousemove", (event) => {
+            // because we're starting in the middle
+            const x = event.offsetX - hoverBox.offsetWidth / 2;
+            const y = event.offsetY - hoverBox.offsetHeight / 2;
+
+            hoverBox.style.setProperty("--x", `${x}px`);
+            hoverBox.style.setProperty("--y", `${y}px`);
+            });
+        </script>
+    </body>
+</html>
