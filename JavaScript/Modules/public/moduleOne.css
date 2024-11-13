@@ -1,0 +1,28 @@
+
+
+/*** Viewport ***/
+.svg-body {
+    box-sizing: border-box;
+    display: flex;
+}
+/* SVG: */
+.svg-container {
+    display: flex;
+    width: 100%;
+    border: 0.2rem solid white;
+}
+.svg-container > svg {
+    flex: 1;
+    height: auto;
+    border: 0.5rem solid greenyellow;
+}
+.svg-container > svg:active {
+    cursor: grabbing; /* <- Change cursor when dragging.*/
+}
+/* Disable interaction with texts: */
+.svg-container > svg text {
+    pointer-events: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Zoom on Mouse Position</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            box-sizing: border-box;
+            font-size: 62.5%;
+        }
+        body {
+            display: flex;
+        }
+
+        #svg-container {
+            display: flex;
+            width: 100%;
+            border: 2px solid white;
+        }
+        #svg-container > svg {
+            flex: 1;
+            height: auto;
+            border: 5px solid greenyellow;
+        }
+        #svg-container > svg:active {
+            cursor: grabbing; /* Change cursor when dragging.*/
+        }
+
+        #svg-container > svg text {
+            pointer-events: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="svg-container">
+        <svg>
+            <g name="viewport">
+                <!-- Tree: -->
+                <path fill="none" stroke="#0C5C4C" stroke-width="5" 
+                    transform="matrix(1, 0, 0, 1, 65, 140)"
+                    d=" M 0 -80
+                    Q 5 -75 0 -70     Q -10 -65 0 -60    Q 15 -55 0 -50
+                    Q -20 -45 0 -40   Q 25 -35 0 -30     Q -30 -25 0 -20
+                    Q 35 -15 0 -10    Q -40 -5 0 0       Q 45 5 0 10
+                    Q -50 15 0 20     Q 55 25 0 30       Q -60 35 0 40
+                    Q 65 45 0 50      Q -70 55 0 60      Q 75 65 0 70
+                    Q -80 75 0 80     Q 85 85 0 90       Q -90 95 0 100
+                    Q 95 105 0 110    Q -100 115 0 120
+                    L 0 140           L 20 140           L -20 140"/>
+                <!-- Star: -->
+                <g transform="matrix(0.2, 0, 0, 0.2, 65, 40)">
+                    <g>
+                        <polygon points="0,0 36,-50 0,-100" fill="#EDD8B7" />
+                        <polygon points="0,0 -36,-50 0,-100" fill="#E5C39C" />
+                    </g>
+                    <g transform="rotate(72)">
+                        <polygon points="0,0 36,-50 0,-100" fill="#EDD8B7" />
+                        <polygon points="0,0 -36,-50 0,-100" fill="#E5C39C" />
+                    </g>
+                    <g transform="rotate(-72)">
+                        <polygon points="0,0 36,-50 0,-100" fill="#EDD8B7" />
+                        <polygon points="0,0 -36,-50 0,-100" fill="#E5C39C" />
+                    </g>
+                    <g transform="rotate(144)">
+                        <polygon points="0,0 36,-50 0,-100" fill="#EDD8B7" />
+                        <polygon points="0,0 -36,-50 0,-100" fill="#E5C39C" />
+                    </g>
+                    <g transform="rotate(-144)">
+                        <polygon points="0,0 36,-50 0,-100" fill="#EDD8B7" />
+                        <polygon points="0,0 -36,-50 0,-100" fill="#E5C39C" />
+                    </g>
+                </g>
+                <!-- Text: -->
+                <defs>
+                    <path id="text-arc"
+                        transform="matrix(1, 0, 0, 1, 43, 60)"
+                        d="M 0, 1 A 30 30 0 1 1 1, 2" />
+                </defs>
+                <text fill="#E5C39C" font-family="Tahoma" font-size="0.77em" font-weight="bold">
+                    <textPath href="#text-arc">
+                        ♥ Gleðilega Hátíð ♥ Gleðilega Hátíð ♥ Gleðilega Hátíð ♥
+                    </textPath>
+                </text>
+                <!-- Christmas Ornament: -->
+                <g transform="matrix(0.125, 0, 0, 0.125, 85, 220)">
+                    <circle cx="0" cy="20" r="70" fill="#D1495B" />
+                    <circle cx="0" cy="-75" r="12" fill="none" stroke="#F79257" stroke-width="2" />
+                    <rect x="-17.5" y="-65" width="35" height="20" fill="#F79257" />
+                </g>
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        xx = {
+            viewport: {
+                isDragging: false,
+                matrix: new DOMMatrix(),
+                zoomFactor: 0.1,
+                offset: { x: 0, y: 0 },
+                oldWindow: { width: window.innerWidth, height: window.innerHeight },
+            },
+        }
+        const svgCanvas = document.querySelector("#svg-container > svg");
+        const viewPort = document.querySelector("#svg-container > svg >:first-child");
+        f_centerViewBox();
+
+
+
+        window.onresize = (event) => {
+            offsetW = window.innerWidth - xx.viewport.oldWindow.width;
+            offsetH = window.innerHeight - xx.viewport.oldWindow.height;
+            if(Math.abs(offsetW) > 6 || Math.abs(offsetH) > 6){
+                xx.viewport.oldWindow.width = window.innerWidth;
+                xx.viewport.oldWindow.height = window.innerHeight;
+                xx.viewport.matrix.preMultiplySelf(new DOMMatrix().translateSelf(offsetW / 2, offsetH / 2));
+                viewPort.style.transform = xx.viewport.matrix.toString();
+            }
+        }
+
+        function f_centerViewBox(){
+            const svgBox = svgCanvas.getBoundingClientRect();
+            const viewBox = viewPort.getBoundingClientRect();
+            // Calculate width and height based on the viewBox:
+            const w = (2 * viewBox.x) + viewBox.width;
+            const h = (2 * viewBox.y) + viewBox.height;
+            // Calculate scaling factors:
+            const scaleX = svgBox.width / w;
+            const scaleY = svgBox.height / h;
+            // Determine the smaller scale and set x, y offsets accordingly:
+            let scale = Math.min(scaleX, scaleY);
+            let x = (scaleX < scaleY) ? 0 : (svgBox.width / (2 * scale)) - (w / 2);
+            let y = (scaleX < scaleY) ? (svgBox.height / (2 * scale)) - (h / 2) : 0;
+            // Apply transformations
+            xx.viewport.matrix.preMultiplySelf(new DOMMatrix()
+                .scaleSelf(scale, scale)
+                .translateSelf(x, y));
+            viewPort.style.transform = xx.viewport.matrix.toString();
+        }
+
+
+
+        svgCanvas.addEventListener("pointerdown" /*"mousedown"*/, function(event){
+            // Mouse Down Event: Start dragging:
+            xx.viewport.isDragging = true;
+            xx.viewport.offset = { x: event.offsetX, y: event.offsetY };
+            /*
+            if(event.target.hasPointerCapture(event.pointerId)){
+                // Make touch behaves like the mouse:
+                event.target.releasePointerCapture(event.pointerId);
+            }
+            */
+        });
+
+        svgCanvas.addEventListener("pointermove" /*"mousemove"*/, function(event){
+            // Mouse Move Event: Handle dragging:
+            if(xx.viewport.isDragging){
+                let tx = event.offsetX - xx.viewport.offset.x;
+                let ty = event.offsetY - xx.viewport.offset.y;
+                xx.viewport.offset = {
+                    x: event.offsetX,
+                    y: event.offsetY
+                };
+                xx.viewport.matrix.preMultiplySelf(new DOMMatrix().translateSelf(tx, ty));
+                viewPort.style.transform = xx.viewport.matrix.toString();
+            }
+        });
+
+        svgCanvas.addEventListener("pointerup" /*"mouseup"*/, function(event){
+            // Mouse Up Event: Stop dragging:
+            xx.viewport.isDragging = false;
+        });
+
+        svgCanvas.addEventListener("pointerleave" /*"mouseleave"*/, function(event){
+            // Mouse Leave Event: Stop dragging if mouse leaves SVG area:
+            xx.viewport.isDragging = false;
+        });
+
+
+
+        svgCanvas.addEventListener("wheel", function(event){
+            // Normalize the wheel scroll speed to handle different browsers and devices:
+            let zoom = event.deltaY > 0 ? -1 : 1;
+            let scale = 1 + xx.viewport.zoomFactor * zoom;
+            xx.viewport.offset = {
+                x: event.offsetX,
+                y: event.offsetY
+            };
+            xx.viewport.matrix.preMultiplySelf(new DOMMatrix()
+                .translateSelf(xx.viewport.offset.x, xx.viewport.offset.y)
+                .scaleSelf(scale, scale)
+                .translateSelf(-xx.viewport.offset.x, -xx.viewport.offset.y));
+            viewPort.style.transform = xx.viewport.matrix.toString();
+        });
+    </script>
+</body>
+</html>

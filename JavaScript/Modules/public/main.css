@@ -1,0 +1,25 @@
+
+/**** Variables: ****/
+:root{
+    /* root variables are available in the whole document.*/
+    /* in this document the 'root' tag is the '<html>' tag.*/
+
+    /* set the font-size to 62.5% to makes it easier to working with 'rem'.*/
+    /* 62.5% font-size is equal to 10px and 1rem in most browsers*/
+    font-size: 62.5%; /* 62.5% == 10px == 1rem */
+
+    --my-color-light-green: #acbf64;
+    --my-color-green: #809c13;
+    --my-color-dark-green: #4e5f0c;
+
+    --my-logo-pos-y: 5vw;
+    --my-logo-pos-x: 5vw;
+    --my-logo-width: 45vw;
+    --my-scrollspy-width: 20.0rem;
+}
+
+html, body {
+    background-color: white;
+    height: 100%;
+    margin: 0;
+}
