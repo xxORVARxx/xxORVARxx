@@ -19,6 +19,12 @@ $git pull origin master
 $git log
 
 
+-===- Authentication Use Personal Access Token (PAT) -===- 
+Create a Personal Access Token:
+Settings -> Developer Settings -> Personal access tokens -> Tokens (classic)
+Use the token instead of password: When Git prompts for credentials
+
+
 -===- Setup Git and Github for the First Time -===-
         
 - Sign up for an account on GitHub.com, with user-name and email.
